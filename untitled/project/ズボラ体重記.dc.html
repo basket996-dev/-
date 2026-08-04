@@ -1,0 +1,1039 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <script src="./image-slot.js"></script>
+  <style>
+    body { margin: 0; background: #eae3d3; overflow-x: hidden; }
+    a { color: #a2632e; }
+    a:hover { color: #7d4c22; }
+    input:focus, textarea:focus { outline: none; }
+    ::placeholder { color: #b9a988; }
+  </style>
+</helmet>
+<div style="min-height:100vh;width:100%;box-sizing:border-box;display:flex;align-items:center;justify-content:center;padding:24px 12px;font-family:'Zen Maru Gothic',sans-serif;overflow:hidden;">
+<div style="zoom:{{ phoneZoom }};">
+<x-import component-from-global-scope="AndroidDevice" from="./android-frame.jsx" hint-size="412,892">
+
+<div style="height:100%;display:flex;flex-direction:column;background:#f6efdc;font-family:'Zen Maru Gothic',sans-serif;color:#4a3722;position:relative;overflow-y:auto;overflow-x:hidden;">
+
+<sc-if value="{{ isOnboarding }}" hint-placeholder-val="{{ true }}">
+<div style="height:100%;display:flex;flex-direction:column;padding:40px 28px 32px;box-sizing:border-box;background:#f6efdc;">
+  <div style="flex:1;display:flex;flex-direction:column;justify-content:center;">
+    <image-slot id="ob-avatar" shape="circle" style="width:72px;height:72px;margin-bottom:16px;" placeholder="写真"></image-slot>
+    <div style="font-size:14px;color:#8a7355;font-weight:500;">はじめまして</div>
+    <div style="font-size:26px;font-weight:700;margin-top:4px;line-height:1.4;">ズボラ体重記へ<br/>ようこそ</div>
+    <div style="font-size:13px;color:#8a7355;margin-top:10px;line-height:1.7;">最初にちょっとだけ教えてください。<br/>あとは毎日ワンタップで大丈夫です。</div>
+
+    <div style="margin-top:32px;display:flex;flex-direction:column;gap:22px;">
+      <div>
+        <div style="font-size:12px;color:#8a7355;font-weight:500;margin-bottom:6px;">身長 (cm)</div>
+        <input type="text" inputmode="decimal" value="{{ obHeight }}" onChange="{{ setObHeight }}" placeholder="160" style="width:100%;box-sizing:border-box;border:none;border-bottom:2px dashed #d8c49a;background:transparent;font-size:24px;font-family:'Zen Maru Gothic',sans-serif;font-weight:700;color:#4a3722;padding:6px 2px;"/>
+      </div>
+      <div>
+        <div style="font-size:12px;color:#8a7355;font-weight:500;margin-bottom:6px;">現在の体重 (kg)</div>
+        <input type="text" inputmode="decimal" value="{{ obWeight }}" onChange="{{ setObWeight }}" placeholder="65.0" style="width:100%;box-sizing:border-box;border:none;border-bottom:2px dashed #d8c49a;background:transparent;font-size:24px;font-family:'Zen Maru Gothic',sans-serif;font-weight:700;color:#4a3722;padding:6px 2px;"/>
+      </div>
+      <div>
+        <div style="font-size:12px;color:#8a7355;font-weight:500;margin-bottom:6px;">目標体重 (kg)</div>
+        <input type="text" inputmode="decimal" value="{{ obTarget }}" onChange="{{ setObTarget }}" placeholder="60.0" style="width:100%;box-sizing:border-box;border:none;border-bottom:2px dashed #d8c49a;background:transparent;font-size:24px;font-family:'Zen Maru Gothic',sans-serif;font-weight:700;color:#4a3722;padding:6px 2px;"/>
+      </div>
+    </div>
+  </div>
+
+  <sc-if value="{{ obError }}" hint-placeholder-val="{{ false }}">
+    <div style="font-size:12.5px;color:#b1503c;font-weight:700;margin-bottom:10px;text-align:center;">3つとも入力してください</div>
+  </sc-if>
+  <button onClick="{{ completeOnboarding }}" style="border:none;border-radius:16px;padding:17px;font-size:16px;font-weight:700;font-family:'Zen Maru Gothic',sans-serif;background:{{ obBtnBg }};color:{{ obBtnColor }};box-shadow:{{ obBtnShadow }};">きろくをはじめる</button>
+</div>
+</sc-if>
+
+<sc-if value="{{ isApp }}" hint-placeholder-val="{{ false }}">
+<div style="height:100%;display:flex;flex-direction:column;position:relative;">
+
+  <div style="flex:1;overflow-y:auto;">
+
+    <div style="position:absolute;top:10px;left:10px;right:10px;z-index:60;transition:transform .35s ease, opacity .35s ease;transform:{{ notifTransform }};opacity:{{ notifOpacity }};">
+      <div style="background:#fffcf5;border:1px solid #e3d5b8;border-radius:14px;padding:12px 14px;display:flex;align-items:center;gap:10px;box-shadow:0 8px 24px rgba(74,55,34,0.18);">
+        <div style="width:28px;height:28px;border-radius:8px;background:{{ accent }};flex-shrink:0;display:flex;align-items:center;justify-content:center;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4 10-11" stroke="#fffcf5" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div style="min-width:0;">
+          <div style="font-size:12.5px;font-weight:700;color:#4a3722;">ズボラ体重記</div>
+          <div style="font-size:12px;color:#8a7355;margin-top:1px;">{{ notifText }}</div>
+        </div>
+      </div>
+    </div>
+
+    <sc-if value="{{ isTabInput }}" hint-placeholder-val="{{ true }}">
+      <sc-if value="{{ showKeypadForToday }}" hint-placeholder-val="{{ true }}">
+        <div style="padding:22px 20px 4px;">
+          <div style="font-size:12.5px;color:#8a7355;font-weight:500;">{{ todayLabel }}</div>
+          <div style="font-size:19px;font-weight:700;margin-top:2px;">今日の体重を記録</div>
+        </div>
+        <div style="margin:10px 20px 16px;background:#fffcf5;border:1px solid #e3d5b8;border-radius:20px;padding:22px 18px;text-align:center;box-shadow:0 2px 10px rgba(74,55,34,0.06);">
+          <div style="font-size:50px;font-weight:700;letter-spacing:-1px;color:#4a3722;font-variant-numeric:tabular-nums;">{{ keypadDisplay }}<span style="font-size:19px;font-weight:500;color:#8a7355;margin-left:6px;">kg</span></div>
+        </div>
+
+        <div style="padding:0 20px;">
+          <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:14px;">
+            <sc-for list="{{ inputStampDefs }}" as="sd" hint-placeholder-count="6">
+              <button onClick="{{ sd.onClick }}" style="border:1.5px solid {{ sd.border }};background:{{ sd.bg }};border-radius:14px;padding:8px 2px;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style="color:{{ sd.color }};">
+                  <sc-if value="{{ sd.isTabesugiIcon }}"><path d="M4 13c0 4 3.6 6 8 6s8-2 8-6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M3 13h18" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M9 8c0-1 .8-2 1-3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M15 8c0-1 .6-2 .8-3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></sc-if>
+                  <sc-if value="{{ sd.isOsakeIcon }}"><path d="M7 4h10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M7 4c0 4 1 7 5 7s5-3 5-7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M12 11v7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M8.5 20h7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></sc-if>
+                  <sc-if value="{{ sd.isUndouIcon }}"><circle cx="14.2" cy="4.6" r="1.8" stroke="currentColor" stroke-width="1.5"/><path d="M14 7.5l-2.5 3 2 2.5-1 6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 7.5l3 2-1 4 3 2.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M11.5 10.5l-3.5 1" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></sc-if>
+                  <sc-if value="{{ sd.isBenzuuIcon }}"><path d="M12 4a4 4 0 110 8 3 3 0 110-6 2 2 0 110 4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></sc-if>
+                  <sc-if value="{{ sd.isGohoubiIcon }}"><path d="M4 18l8-12 8 12z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><circle cx="12" cy="6" r="1.2" fill="currentColor"/><path d="M4 18h16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></sc-if>
+                  <sc-if value="{{ sd.isGanbattaIcon }}"><circle cx="12" cy="9" r="4.5" stroke="currentColor" stroke-width="1.7"/><path d="M9.3 13l-2.8 6.8 3-1.3 1.5 2.7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M14.7 13l2.8 6.8-3-1.3-1.5 2.7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 9l1.3 1.3L14 8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></sc-if>
+                </svg>
+                <span style="font-size:9.5px;font-weight:500;color:{{ sd.color }};">{{ sd.label }}</span>
+              </button>
+            </sc-for>
+          </div>
+
+          <sc-if value="{{ !memoOpen }}" hint-placeholder-val="{{ true }}">
+            <button onClick="{{ toggleMemo }}" style="border:none;background:none;display:flex;align-items:center;gap:5px;padding:0 0 12px;color:#b9a988;font-size:12px;font-family:'Zen Maru Gothic',sans-serif;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M4 20l1-4L16 5l3 3L8 19l-4 1z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+              メモを追加
+            </button>
+          </sc-if>
+          <sc-if value="{{ memoOpen }}" hint-placeholder-val="{{ false }}">
+            <textarea value="{{ memoValue }}" onChange="{{ setMemoValue }}" placeholder="ひとことメモ（任意）" rows="2" style="width:100%;box-sizing:border-box;border:1px solid #e3d5b8;background:#fffcf5;border-radius:12px;padding:10px 12px;font-family:'Zen Maru Gothic',sans-serif;font-size:13px;color:#4a3722;margin-bottom:12px;resize:none;"></textarea>
+          </sc-if>
+
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
+            <sc-for list="{{ keypadKeys }}" as="k" hint-placeholder-count="12">
+              <button onClick="{{ k.onClick }}" style="border:none;background:#fffcf5;border:1px solid #e9ddc4;border-radius:14px;padding:14px 0;font-size:19px;font-weight:700;font-family:'Zen Maru Gothic',sans-serif;color:#4a3722;">{{ k.label }}</button>
+            </sc-for>
+          </div>
+
+          <button onClick="{{ saveToday }}" disabled="{{ saveDisabled }}" style="width:100%;margin:14px 0 20px;border:none;border-radius:16px;padding:16px;font-size:16px;font-weight:700;font-family:'Zen Maru Gothic',sans-serif;background:{{ saveBtnBg }};color:{{ saveBtnColor }};transform:{{ saveBtnScale }};transition:transform .25s ease;">{{ saveBtnLabel }}</button>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ todayAlreadyLogged }}" hint-placeholder-val="{{ false }}">
+        <div style="height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 28px 40px;text-align:center;box-sizing:border-box;">
+          <div style="width:60px;height:60px;border-radius:50%;background:{{ accentFaint }};display:flex;align-items:center;justify-content:center;margin-bottom:18px;">
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4 10-11" stroke="{{ accent }}" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div style="font-size:13px;color:#8a7355;font-weight:500;">{{ todayLabel }} · 記録済み</div>
+          <div style="font-size:46px;font-weight:700;margin-top:6px;">{{ todayWeightDisplay }}<span style="font-size:17px;color:#8a7355;font-weight:500;"> kg</span></div>
+          <div style="display:flex;gap:6px;margin-top:14px;min-height:20px;">
+            <sc-for list="{{ todayStampIcons }}" as="icon" hint-placeholder-count="0">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style="color:{{ icon.color }};">
+                <sc-if value="{{ icon.isTabesugi }}"><path d="M4 13c0 4 3.6 6 8 6s8-2 8-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M3 13h18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></sc-if>
+                <sc-if value="{{ icon.isOsake }}"><path d="M7 4h10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M7 4c0 4 1 7 5 7s5-3 5-7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M12 11v7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></sc-if>
+                <sc-if value="{{ icon.isUndou }}"><circle cx="14.2" cy="4.6" r="1.8" stroke="currentColor" stroke-width="1.5"/><path d="M14 7.5l-2.5 3 2 2.5-1 6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 7.5l3 2-1 4 3 2.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></sc-if>
+                <sc-if value="{{ icon.isBenzuu }}"><path d="M12 4a4 4 0 110 8 3 3 0 110-6 2 2 0 110 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></sc-if>
+                <sc-if value="{{ icon.isGohoubi }}"><path d="M4 18l8-12 8 12z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><circle cx="12" cy="6" r="1.2" fill="currentColor"/></sc-if>
+                <sc-if value="{{ icon.isGanbatta }}"><circle cx="12" cy="9" r="4.5" stroke="currentColor" stroke-width="1.7"/><path d="M9.3 13l-2.8 6.8 3-1.3 1.5 2.7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M14.7 13l2.8 6.8-3-1.3-1.5 2.7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></sc-if>
+              </svg>
+            </sc-for>
+          </div>
+          <div style="display:flex;gap:10px;margin-top:30px;">
+            <button onClick="{{ editTodayAgain }}" style="border:1px solid #d8c49a;background:transparent;border-radius:100px;padding:11px 20px;font-size:13px;color:{{ accentDark }};font-weight:700;font-family:'Zen Maru Gothic',sans-serif;">編集する</button>
+            <button onClick="{{ goToCalendarTab }}" style="border:none;background:{{ accent }};border-radius:100px;padding:11px 20px;font-size:13px;color:#fffcf5;font-weight:700;font-family:'Zen Maru Gothic',sans-serif;">カレンダーを見る</button>
+          </div>
+        </div>
+      </sc-if>
+    </sc-if>
+
+    <sc-if value="{{ isTabCalendar }}" hint-placeholder-val="{{ false }}">
+      <div style="padding:22px 12px 4px;font-size:19px;font-weight:700;">カレンダー</div>
+      <div style="padding:8px 12px 8px;display:flex;align-items:center;justify-content:space-between;">
+        <div style="display:flex;align-items:center;">
+          <button onClick="{{ prevYear }}" style="border:none;background:none;font-size:15px;color:{{ accentDark }};padding:6px 4px;">«</button>
+          <button onClick="{{ prevMonth }}" style="border:none;background:none;font-size:18px;color:{{ accentDark }};padding:6px 4px;">‹</button>
+        </div>
+        <div style="font-size:14px;font-weight:700;">{{ monthLabel }}</div>
+        <div style="display:flex;align-items:center;">
+          <button onClick="{{ nextMonth }}" style="border:none;background:none;font-size:18px;color:{{ accentDark }};padding:6px 4px;">›</button>
+          <button onClick="{{ nextYear }}" style="border:none;background:none;font-size:15px;color:{{ accentDark }};padding:6px 4px;">»</button>
+        </div>
+      </div>
+      <div style="padding:0 10px 22px;">
+        <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:8px;">
+          <div style="text-align:center;font-size:11px;color:#c0574a;font-weight:700;">日</div>
+          <div style="text-align:center;font-size:11px;color:#8a7355;font-weight:700;">月</div>
+          <div style="text-align:center;font-size:11px;color:#8a7355;font-weight:700;">火</div>
+          <div style="text-align:center;font-size:11px;color:#8a7355;font-weight:700;">水</div>
+          <div style="text-align:center;font-size:11px;color:#8a7355;font-weight:700;">木</div>
+          <div style="text-align:center;font-size:11px;color:#8a7355;font-weight:700;">金</div>
+          <div style="text-align:center;font-size:11px;color:#5f7cb5;font-weight:700;">土</div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px;">
+          <sc-for list="{{ calendarCells }}" as="cell" hint-placeholder-count="42">
+            <button onClick="{{ cell.onClick }}" style="position:relative;aspect-ratio:0.78;border:1.5px solid {{ cell.borderColor }};background:{{ cell.bgColor }};border-radius:13px;padding:5px 2px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;opacity:{{ cell.opacity }};">
+              <sc-if value="{{ cell.hasMemo }}">
+                <span style="position:absolute;top:4px;right:5px;width:5px;height:5px;border-radius:50%;background:{{ accentDark }};"></span>
+              </sc-if>
+              <span style="font-size:10.5px;color:#8a7355;">{{ cell.dayLabel }}</span>
+              <span style="font-size:13px;font-weight:700;color:#4a3722;">{{ cell.weightDisplay }}</span>
+              <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:1px;min-height:13px;">
+                <sc-for list="{{ cell.stampIcons }}" as="icon" hint-placeholder-count="1">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" style="color:{{ icon.color }};">
+                    <sc-if value="{{ icon.isTabesugi }}"><path d="M4 13c0 4 3.6 6 8 6s8-2 8-6" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/><path d="M3 13h18" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></sc-if>
+                    <sc-if value="{{ icon.isOsake }}"><path d="M7 4h10" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><path d="M7 4c0 4 1 7 5 7s5-3 5-7" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><path d="M12 11v7" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></sc-if>
+                    <sc-if value="{{ icon.isUndou }}"><circle cx="14.2" cy="4.6" r="2.4" fill="currentColor"/><path d="M14 7.5l-2.5 3 2 2.5-1 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 7.5l3 2-1 4 3 2.5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></sc-if>
+                    <sc-if value="{{ icon.isBenzuu }}"><path d="M12 4a4 4 0 110 8 3 3 0 110-6 2 2 0 110 4" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></sc-if>
+                    <sc-if value="{{ icon.isGohoubi }}"><path d="M4 18l8-12 8 12z" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/><circle cx="12" cy="6" r="1.8" fill="currentColor"/></sc-if>
+                    <sc-if value="{{ icon.isGanbatta }}"><circle cx="12" cy="10" r="6" stroke="currentColor" stroke-width="2.4"/><path d="M9.5 10.2l1.8 1.8L15 8.5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></sc-if>
+                  </svg>
+                </sc-for>
+              </div>
+            </button>
+          </sc-for>
+        </div>
+      </div>
+
+      <sc-if value="{{ memories.length }}" hint-placeholder-val="{{ false }}">
+        <div style="margin:0 20px 14px;background:#fdf5e6;border:1px solid #e9ddc4;border-radius:18px;padding:16px;">
+          <div style="font-size:13px;font-weight:700;margin-bottom:12px;">思い出</div>
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <sc-for list="{{ memories }}" as="mem" hint-placeholder-count="1">
+              <button onClick="{{ mem.onClick }}" style="border:none;background:none;text-align:left;padding:0;display:flex;flex-direction:column;gap:2px;">
+                <div style="display:flex;gap:8px;align-items:baseline;flex-wrap:wrap;">
+                  <span style="font-size:11px;color:{{ accentDark }};font-weight:700;">{{ mem.yearLabel }}</span>
+                  <span style="font-size:10.5px;color:#8a7355;">{{ mem.dateLabel }}</span>
+                  <span style="font-size:12px;font-weight:700;color:#4a3722;">{{ mem.weight }}kg</span>
+                  <span style="font-size:11px;font-weight:700;color:{{ mem.diffColor }};">今より {{ mem.diffText }}</span>
+                </div>
+                <sc-if value="{{ mem.memo }}">
+                  <div style="font-size:13px;color:#4a3722;line-height:1.5;">{{ mem.memo }}</div>
+                </sc-if>
+              </button>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ memoFeed.length }}" hint-placeholder-val="{{ true }}">
+        <div style="margin:0 20px 24px;background:#fffcf5;border:1px solid #e3d5b8;border-radius:18px;padding:16px;">
+          <div style="font-size:13px;font-weight:700;margin-bottom:12px;">最近のメモ</div>
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <sc-for list="{{ memoFeed }}" as="m" hint-placeholder-count="3">
+              <button onClick="{{ m.onClick }}" style="border:none;background:none;text-align:left;padding:0;display:flex;flex-direction:column;gap:2px;">
+                <div style="display:flex;gap:8px;align-items:baseline;">
+                  <span style="font-size:11px;color:#8a7355;font-weight:500;">{{ m.dateLabel }}</span>
+                  <span style="font-size:12px;font-weight:700;color:#4a3722;">{{ m.weight }}kg</span>
+                </div>
+                <div style="font-size:13px;color:#4a3722;line-height:1.5;">{{ m.memo }}</div>
+              </button>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+    </sc-if>
+
+    <sc-if value="{{ isTabGraph }}" hint-placeholder-val="{{ false }}">
+      <div style="padding:22px 20px 4px;font-size:19px;font-weight:700;">グラフ</div>
+      <div style="padding:12px 16px 4px;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
+        <div style="background:#fffcf5;border:1px solid #e3d5b8;border-radius:16px;padding:12px 6px;text-align:center;">
+          <div style="font-size:10.5px;color:#8a7355;font-weight:500;">スタート時から</div>
+          <div style="font-size:20px;font-weight:700;color:{{ accent }};margin-top:4px;">-{{ lostSoFar }}<span style="font-size:11.5px;">kg</span></div>
+        </div>
+        <div style="background:#fffcf5;border:1px solid #e3d5b8;border-radius:16px;padding:12px 6px;text-align:center;">
+          <div style="font-size:10.5px;color:#8a7355;font-weight:500;">目標まであと</div>
+          <div style="font-size:20px;font-weight:700;color:#4a3722;margin-top:4px;">{{ remaining }}<span style="font-size:11.5px;">kg</span></div>
+        </div>
+        <div style="background:#fffcf5;border:1px solid #e3d5b8;border-radius:16px;padding:12px 6px;text-align:center;">
+          <div style="font-size:10.5px;color:#8a7355;font-weight:500;">前日比</div>
+          <div style="font-size:20px;font-weight:700;color:{{ dayDiffColor }};margin-top:4px;">{{ dayDiffText }}<span style="font-size:11.5px;">kg</span></div>
+        </div>
+      </div>
+
+      <div style="margin:16px 16px 10px;background:#fffcf5;border:1px solid #e3d5b8;border-radius:18px;padding:18px 8px 14px;position:relative;">
+        <svg viewBox="0 0 376 {{ graphChartH }}" width="100%" height="{{ graphChartH }}" style="display:block;">
+          <sc-for list="{{ graphGrid }}" as="g" hint-placeholder-count="3">
+            <line x1="34" y1="{{ g.y }}" x2="368" y2="{{ g.y }}" stroke="#e9ddc4" stroke-width="1" stroke-dasharray="3,4"/>
+          </sc-for>
+          <path d="{{ graphArea }}" fill="{{ accentFaint }}" stroke="none"/>
+          <path d="{{ graphPath }}" fill="none" stroke="{{ accent }}" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>
+          <sc-for list="{{ graphPoints }}" as="pt" hint-placeholder-count="30">
+            <circle cx="{{ pt.x }}" cy="{{ pt.y }}" r="{{ pt.r }}" fill="{{ accent }}" stroke="#fffcf5" stroke-width="1.5"/>
+            <sc-if value="{{ pt.hasStamp }}">
+              <circle cx="{{ pt.x }}" cy="{{ pt.markerY }}" r="3.2" fill="{{ pt.dotColor }}" stroke="#fffcf5" stroke-width="1"/>
+            </sc-if>
+          </sc-for>
+        </svg>
+        <sc-for list="{{ graphGrid }}" as="g" hint-placeholder-count="3">
+          <div style="position:absolute;left:8px;top:{{ g.topPct }}%;transform:translateY(-50%);font-size:10.5px;color:#a89877;font-family:'Zen Maru Gothic',sans-serif;background:#fffcf5;padding:0 2px;">{{ g.label }}</div>
+        </sc-for>
+        <sc-for list="{{ graphPoints }}" as="pt" hint-placeholder-count="30">
+          <sc-if value="{{ pt.showLabel }}">
+            <div style="position:absolute;left:{{ pt.labelLeftPct }}%;top:{{ pt.labelTopPct }}%;transform:{{ pt.labelTransform }};font-size:13px;font-weight:700;color:#4a3722;font-family:'Zen Maru Gothic',sans-serif;white-space:nowrap;">{{ pt.labelText }}</div>
+          </sc-if>
+        </sc-for>
+      </div>
+
+      <div style="margin:0 16px 24px;background:#fffcf5;border:1px solid #e3d5b8;border-radius:18px;padding:16px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+          <div style="font-size:12px;color:#8a7355;font-weight:500;">BMI</div>
+          <div style="font-size:20px;font-weight:700;">{{ bmi }}</div>
+        </div>
+        <div style="font-size:11px;color:#8a7355;font-weight:500;margin-bottom:8px;">今週の記録</div>
+        <sc-if value="{{ weeklyStampCounts.length }}" hint-placeholder-val="{{ true }}">
+          <div style="display:flex;flex-wrap:wrap;gap:8px;">
+            <sc-for list="{{ weeklyStampCounts }}" as="ws" hint-placeholder-count="3">
+              <div style="display:flex;align-items:center;gap:5px;background:#fdf5e6;border-radius:100px;padding:5px 10px;">
+                <span style="width:8px;height:8px;border-radius:50%;background:{{ ws.color }};display:inline-block;"></span>
+                <span style="font-size:11.5px;color:#4a3722;">{{ ws.label }} ×{{ ws.count }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+        <sc-if value="{{ !weeklyStampCounts.length }}" hint-placeholder-val="{{ false }}">
+          <div style="font-size:12px;color:#b9a988;">まだ記録がありません</div>
+        </sc-if>
+        <div style="font-size:10.5px;color:#b9a988;margin-top:10px;">スタンプの詳細はカレンダーで確認できます</div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isTabSettings }}" hint-placeholder-val="{{ false }}">
+      <div style="padding:22px 20px 4px;font-size:19px;font-weight:700;">設定</div>
+
+      <div style="margin:14px 20px;background:#fffcf5;border:1px solid #e3d5b8;border-radius:18px;padding:18px;">
+        <div style="font-size:13px;font-weight:700;margin-bottom:12px;">グラフ表示</div>
+        <div style="font-size:11.5px;color:#8a7355;margin-bottom:6px;">期間</div>
+        <div style="display:flex;background:#fdf5e6;border-radius:100px;padding:3px;margin-bottom:14px;">
+          <sc-for list="{{ periodDefs }}" as="p" hint-placeholder-count="4">
+            <button onClick="{{ p.onClick }}" style="flex:1;border:none;background:{{ p.bg }};color:{{ p.color }};border-radius:100px;padding:7px 0;font-size:11.5px;font-weight:700;font-family:'Zen Maru Gothic',sans-serif;">{{ p.label }}</button>
+          </sc-for>
+        </div>
+        <div style="font-size:11.5px;color:#8a7355;margin-bottom:6px;">行動スタンプの表示</div>
+        <div style="display:flex;background:#fdf5e6;border-radius:100px;padding:3px;">
+          <sc-for list="{{ stampModeDefs }}" as="m" hint-placeholder-count="3">
+            <button onClick="{{ m.onClick }}" style="flex:1;border:none;background:{{ m.bg }};color:{{ m.color }};border-radius:100px;padding:7px 0;font-size:11.5px;font-weight:700;font-family:'Zen Maru Gothic',sans-serif;">{{ m.label }}</button>
+          </sc-for>
+        </div>
+      </div>
+
+      <div style="margin:14px 20px;background:#fffcf5;border:1px solid #e3d5b8;border-radius:18px;padding:18px;">
+        <div style="font-size:13px;font-weight:700;margin-bottom:14px;">目標設定</div>
+        <div style="display:flex;flex-direction:column;gap:14px;">
+          <div>
+            <div style="font-size:11.5px;color:#8a7355;margin-bottom:5px;">身長 (cm)</div>
+            <input type="text" inputmode="decimal" value="{{ settingsHeightDraft }}" onChange="{{ setSettingsHeight }}" style="width:100%;box-sizing:border-box;border:1px solid #e9ddc4;background:#fdf9ef;border-radius:10px;padding:9px 12px;font-family:'Zen Maru Gothic',sans-serif;font-size:15px;font-weight:700;color:#4a3722;"/>
+          </div>
+          <div>
+            <div style="font-size:11.5px;color:#8a7355;margin-bottom:5px;">目標体重 (kg)</div>
+            <input type="text" inputmode="decimal" value="{{ settingsTargetDraft }}" onChange="{{ setSettingsTarget }}" style="width:100%;box-sizing:border-box;border:1px solid #e9ddc4;background:#fdf9ef;border-radius:10px;padding:9px 12px;font-family:'Zen Maru Gothic',sans-serif;font-size:15px;font-weight:700;color:#4a3722;"/>
+          </div>
+        </div>
+        <button onClick="{{ saveSettingsGoal }}" style="width:100%;margin-top:14px;border:none;border-radius:12px;padding:11px;font-size:13.5px;font-weight:700;font-family:'Zen Maru Gothic',sans-serif;background:{{ accent }};color:#fffcf5;">{{ settingsSaveLabel }}</button>
+      </div>
+
+      <div style="margin:14px 20px;background:#fffcf5;border:1px solid #e3d5b8;border-radius:18px;padding:18px;">
+        <div style="font-size:13px;font-weight:700;margin-bottom:14px;">通知</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <span style="font-size:13.5px;">リマインド通知</span>
+          <button onClick="{{ toggleReminder }}" style="width:44px;height:26px;border-radius:100px;border:none;background:{{ reminderTrackBg }};position:relative;padding:0;">
+            <span style="position:absolute;top:2px;left:{{ reminderKnobLeft }};width:22px;height:22px;border-radius:50%;background:#fffcf5;transition:left .2s ease;box-shadow:0 1px 3px rgba(0,0,0,0.2);"></span>
+          </button>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:14px;">
+          <span style="font-size:13.5px;">時刻</span>
+          <input type="time" value="{{ reminderTime }}" onChange="{{ setReminderTime }}" style="border:1px solid #e9ddc4;background:#fdf9ef;border-radius:10px;padding:7px 10px;font-family:'Zen Maru Gothic',sans-serif;font-size:13.5px;color:#4a3722;"/>
+        </div>
+        <button onClick="{{ previewNotif }}" style="width:100%;margin-top:14px;border:1px solid #d8c49a;background:transparent;border-radius:12px;padding:10px;font-size:12.5px;font-weight:700;color:{{ accentDark }};font-family:'Zen Maru Gothic',sans-serif;">通知プレビューを見る</button>
+      </div>
+
+      <div style="margin:14px 20px 28px;background:#fffcf5;border:1px solid #e3d5b8;border-radius:18px;padding:18px;">
+        <div style="font-size:13px;font-weight:700;margin-bottom:12px;">データ</div>
+        <div style="display:flex;flex-direction:column;gap:10px;opacity:0.55;">
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <span style="font-size:13px;">Googleドライブへバックアップ</span>
+            <span style="font-size:10px;background:#e9ddc4;color:#8a7355;padding:3px 8px;border-radius:100px;">近日公開</span>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <span style="font-size:13px;">CSV出力</span>
+            <span style="font-size:10px;background:#e9ddc4;color:#8a7355;padding:3px 8px;border-radius:100px;">近日公開</span>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <span style="font-size:13px;">BMI自動計算</span>
+            <span style="font-size:10px;background:#e9ddc4;color:#8a7355;padding:3px 8px;border-radius:100px;">近日公開</span>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ dayModalOpen }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;inset:0;background:rgba(74,55,34,0.35);z-index:70;display:flex;align-items:flex-end;">
+        <div style="width:100%;background:#f6efdc;border-radius:24px 24px 0 0;padding:20px 20px 26px;box-sizing:border-box;box-shadow:0 -8px 30px rgba(74,55,34,0.2);">
+          <div style="width:36px;height:4px;border-radius:2px;background:#d8c49a;margin:0 auto 16px;"></div>
+          <div style="font-size:14px;font-weight:700;margin-bottom:14px;">{{ dayModalDateLabel }}</div>
+          <div style="text-align:center;margin-bottom:16px;">
+            <input type="text" inputmode="decimal" value="{{ dayModalWeight }}" onChange="{{ setDayModalWeight }}" placeholder="--" style="width:140px;text-align:center;border:none;border-bottom:2px dashed #d8c49a;background:transparent;font-size:34px;font-weight:700;font-family:'Zen Maru Gothic',sans-serif;color:#4a3722;padding:4px;"/>
+            <span style="font-size:16px;color:#8a7355;margin-left:6px;">kg</span>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:14px;">
+            <sc-for list="{{ dayModalStampDefs }}" as="sd" hint-placeholder-count="6">
+              <button onClick="{{ sd.onClick }}" style="border:1.5px solid {{ sd.border }};background:{{ sd.bg }};border-radius:14px;padding:8px 2px;display:flex;flex-direction:column;align-items:center;gap:4px;">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" style="color:{{ sd.color }};">
+                  <sc-if value="{{ sd.isTabesugiIcon }}"><path d="M4 13c0 4 3.6 6 8 6s8-2 8-6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M3 13h18" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M9 8c0-1 .8-2 1-3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M15 8c0-1 .6-2 .8-3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></sc-if>
+                  <sc-if value="{{ sd.isOsakeIcon }}"><path d="M7 4h10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M7 4c0 4 1 7 5 7s5-3 5-7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M12 11v7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M8.5 20h7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></sc-if>
+                  <sc-if value="{{ sd.isUndouIcon }}"><circle cx="14.2" cy="4.6" r="1.8" stroke="currentColor" stroke-width="1.5"/><path d="M14 7.5l-2.5 3 2 2.5-1 6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 7.5l3 2-1 4 3 2.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M11.5 10.5l-3.5 1" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></sc-if>
+                  <sc-if value="{{ sd.isBenzuuIcon }}"><path d="M12 4a4 4 0 110 8 3 3 0 110-6 2 2 0 110 4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></sc-if>
+                  <sc-if value="{{ sd.isGohoubiIcon }}"><path d="M4 18l8-12 8 12z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><circle cx="12" cy="6" r="1.2" fill="currentColor"/><path d="M4 18h16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></sc-if>
+                  <sc-if value="{{ sd.isGanbattaIcon }}"><circle cx="12" cy="9" r="4.5" stroke="currentColor" stroke-width="1.7"/><path d="M9.3 13l-2.8 6.8 3-1.3 1.5 2.7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M14.7 13l2.8 6.8-3-1.3-1.5 2.7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 9l1.3 1.3L14 8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></sc-if>
+                </svg>
+                <span style="font-size:9px;font-weight:500;color:{{ sd.color }};">{{ sd.label }}</span>
+              </button>
+            </sc-for>
+          </div>
+          <textarea value="{{ dayModalMemo }}" onChange="{{ setDayModalMemo }}" placeholder="ひとことメモ（任意）" rows="2" style="width:100%;box-sizing:border-box;border:1px solid #e3d5b8;background:#fffcf5;border-radius:12px;padding:10px 12px;font-family:'Zen Maru Gothic',sans-serif;font-size:13px;color:#4a3722;margin-bottom:16px;resize:none;"></textarea>
+          <div style="display:flex;gap:8px;">
+            <sc-if value="{{ hasExistingDayEntry }}">
+              <button onClick="{{ deleteDayModal }}" style="border:none;background:transparent;color:#b1503c;font-size:13px;font-weight:700;font-family:'Zen Maru Gothic',sans-serif;padding:12px 14px;">削除</button>
+            </sc-if>
+            <div style="flex:1;"></div>
+            <button onClick="{{ closeDayModal }}" style="border:1px solid #d8c49a;background:transparent;border-radius:12px;padding:12px 18px;font-size:13px;font-weight:700;color:#8a7355;font-family:'Zen Maru Gothic',sans-serif;">キャンセル</button>
+            <button onClick="{{ saveDayModal }}" style="border:none;background:{{ accent }};border-radius:12px;padding:12px 18px;font-size:13px;font-weight:700;color:#fffcf5;font-family:'Zen Maru Gothic',sans-serif;">保存</button>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+  </div>
+
+  <div style="flex-shrink:0;display:flex;border-top:1px solid #e3d5b8;background:#fbf6e9;">
+    <sc-for list="{{ tabDefs }}" as="tab" hint-placeholder-count="4">
+      <button onClick="{{ tab.onClick }}" style="flex:1;border:none;background:none;display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 0 12px;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style="color:{{ tab.color }};">
+          <sc-if value="{{ tab.isInput }}"><path d="M4 20l1-4L16 5l3 3L8 19l-4 1z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M14 7l3 3" stroke="currentColor" stroke-width="1.7"/></sc-if>
+          <sc-if value="{{ tab.isCalendar }}"><rect x="4" y="5" width="16" height="15" rx="2" stroke="currentColor" stroke-width="1.7"/><path d="M4 10h16M8 3v4M16 3v4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></sc-if>
+          <sc-if value="{{ tab.isGraph }}"><path d="M4 19V5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M4 19h16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M6 15l4-4 3 3 5-6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></sc-if>
+          <sc-if value="{{ tab.isSettings }}"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.7"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.8 5.8l2.1 2.1M16.1 16.1l2.1 2.1M5.8 18.2l2.1-2.1M16.1 7.9l2.1-2.1" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></sc-if>
+        </svg>
+        <span style="font-size:10px;font-weight:700;color:{{ tab.color }};">{{ tab.label }}</span>
+      </button>
+    </sc-for>
+  </div>
+
+</div>
+</sc-if>
+
+</div>
+
+</x-import>
+</div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;accentColor&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#4a6fa5&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;options&quot;:[&quot;#c9762e&quot;,&quot;#b1503c&quot;,&quot;#6b8f5e&quot;,&quot;#4a6fa5&quot;],&quot;section&quot;:&quot;見た目&quot;}}">
+const STAMP_COLORS = {
+  tabesugi: '#c96f2e', osake: '#8b5e34', undou: '#6b8f5e',
+  benzuu: '#a68a5b', gohoubi: '#b1503c', ganbatta: '#caa23c',
+};
+const STAMP_DEFS = [
+  { id: 'tabesugi', label: '食べすぎ' },
+  { id: 'osake', label: 'お酒' },
+  { id: 'undou', label: '運動' },
+  { id: 'benzuu', label: '便通' },
+  { id: 'gohoubi', label: 'ご褒美' },
+  { id: 'ganbatta', label: 'がんばった' },
+];
+
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    const entries = this.generateSampleEntries();
+    const keys = Object.keys(entries).sort();
+    const startWeight = entries[keys[0]].weight;
+    this.state = {
+      screen: 'onboarding',
+      obHeight: '', obWeight: '', obTarget: '', obError: false,
+      activeTab: 'input',
+      entries,
+      todayKey: '2026-08-04',
+      startWeight,
+      targetWeight: 62.0,
+      heightCm: 165,
+      keypadValue: '',
+      selectedStamps: [],
+      memoOpen: false,
+      memoValue: '',
+      forceKeypadToday: false,
+      saving: false,
+      notif: { visible: false, text: '' },
+      calendarYear: 2026,
+      calendarMonth: 7,
+      dayModalDate: null,
+      dayModalWeight: '',
+      dayModalStamps: [],
+      dayModalMemo: '',
+      reminderEnabled: true,
+      reminderTime: '21:00',
+      settingsSaved: false,
+      settingsHeightDraft: '165',
+      settingsTargetDraft: '62.0',
+      viewportScale: 1,
+      graphPeriod: 'month',
+      graphStampMode: 'key',
+    };
+  }
+
+  componentDidMount() {
+    this.updateScale = () => {
+      const s = Math.min(1, (window.innerWidth - 24) / 428);
+      this.setState({ viewportScale: Math.max(0.4, s) });
+    };
+    this.updateScale();
+    window.addEventListener('resize', this.updateScale);
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener('resize', this.updateScale);
+  }
+
+  generateSampleEntries() {
+    const entries = {};
+    const start = new Date('2026-06-10T00:00:00');
+    let w = 68.6;
+    for (let i = 0; i < 55; i++) {
+      const d = new Date(start);
+      d.setDate(d.getDate() + i);
+      const key = this.localDateKey(d);
+      const skip = (i % 13 === 5) || (i % 17 === 9) || i === 2 || i === 3;
+      if (skip) continue;
+      w += (Math.random() - 0.6) * 0.35;
+      w = Math.max(60, Math.min(70, w));
+      const stamps = [];
+      const r = Math.random();
+      if (r < 0.11) stamps.push('tabesugi');
+      else if (r < 0.20) stamps.push('osake');
+      else if (r < 0.34) stamps.push('undou');
+      else if (r < 0.40) stamps.push('benzuu');
+      else if (r < 0.46) stamps.push('gohoubi');
+      else if (r < 0.50) stamps.push('ganbatta');
+      if (stamps.length && Math.random() < 0.22) {
+        const others = Object.keys(STAMP_COLORS).filter(id => !stamps.includes(id));
+        stamps.push(others[Math.floor(Math.random() * others.length)]);
+      }
+      let memo = '';
+      if (Math.random() < 0.16) {
+        const pool = ['旅行明けで少し増えた', '運動した後は体が軽い', '飲みすぎた…反省', '久しぶりに体重計に乗った', '朝ごはん少なめにしてみた', '寝不足のせいかな'];
+        memo = pool[Math.floor(Math.random() * pool.length)];
+      }
+      entries[key] = { weight: Math.round(w * 10) / 10, stamps, memo };
+    }
+    this.addMemoryYear(entries, 2024, 74.8, 'ダイエットを始めたばかりの頃。まだ数字を見るのが怖かった。');
+    this.addMemoryYear(entries, 2025, 70.2, '去年よりは少し慣れてきた。焦らず続けるのが目標。');
+    return entries;
+  }
+
+  addMemoryYear(entries, year, baseWeight, memoText) {
+    let w = baseWeight;
+    for (let d = -3; d <= 3; d++) {
+      const dt = new Date(`${year}-08-04T00:00:00`);
+      dt.setDate(dt.getDate() + d);
+      const key = this.localDateKey(dt);
+      w += (Math.random() - 0.5) * 0.3;
+      entries[key] = { weight: Math.round(w * 10) / 10, stamps: [], memo: d === 0 ? memoText : '' };
+    }
+  }
+
+  localDateKey(d) {
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  }
+
+  weekdayJa(dateKey) {
+    const d = new Date(dateKey + 'T00:00:00');
+    return ['日', '月', '火', '水', '木', '金', '土'][d.getDay()];
+  }
+
+  formatDateJa(dateKey) {
+    const d = new Date(dateKey + 'T00:00:00');
+    return `${d.getMonth() + 1}月${d.getDate()}日(${this.weekdayJa(dateKey)})`;
+  }
+
+  keyOf(y, m, day) {
+    const mm = String(m + 1).padStart(2, '0');
+    const dd = String(day).padStart(2, '0');
+    return `${y}-${mm}-${dd}`;
+  }
+
+  buildCalendarCells(year, month, entries, todayKey, accent) {
+    const firstOfMonth = new Date(year, month, 1);
+    const startOffset = firstOfMonth.getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const cells = [];
+    for (let i = 0; i < 42; i++) {
+      const dayNum = i - startOffset + 1;
+      const inMonth = dayNum >= 1 && dayNum <= daysInMonth;
+      let dateKey = null, entry = null;
+      if (inMonth) {
+        dateKey = this.keyOf(year, month, dayNum);
+        entry = entries[dateKey] || null;
+      }
+      const isToday = dateKey === todayKey;
+      cells.push({
+        cellKey: `c${i}`,
+        dayLabel: inMonth ? String(dayNum) : '',
+        dateKey,
+        onClick: inMonth ? () => this.openDayModal(dateKey) : () => {},
+        borderColor: isToday ? accent : (inMonth ? '#e9ddc4' : 'transparent'),
+        bgColor: inMonth ? (entry ? '#fdf5e6' : '#fffcf5') : 'transparent',
+        opacity: inMonth ? 1 : 0,
+        weightDisplay: entry ? entry.weight.toFixed(1) : '',
+        stampIcons: this.stampIconsFor(entry && entry.stamps ? entry.stamps : [], dateKey),
+        hasMemo: !!(entry && entry.memo && entry.memo.trim() !== ''),
+      });
+    }
+    return cells;
+  }
+
+  stampIconsFor(stampList, keyPrefix) {
+    return (stampList || []).map((id, si) => ({
+      iKey: `${keyPrefix}-${si}`,
+      color: STAMP_COLORS[id],
+      isTabesugi: id === 'tabesugi',
+      isOsake: id === 'osake',
+      isUndou: id === 'undou',
+      isBenzuu: id === 'benzuu',
+      isGohoubi: id === 'gohoubi',
+      isGanbatta: id === 'ganbatta',
+    }));
+  }
+
+  filterEntriesByPeriod(entries, period, todayKey) {
+    if (period === 'all') return entries;
+    const days = period === 'week' ? 7 : period === 'month' ? 30 : 90;
+    const today = new Date(todayKey + 'T00:00:00');
+    const cutoff = new Date(today);
+    cutoff.setDate(cutoff.getDate() - (days - 1));
+    const filtered = {};
+    Object.keys(entries).forEach(k => {
+      const d = new Date(k + 'T00:00:00');
+      if (d >= cutoff && d <= today) filtered[k] = entries[k];
+    });
+    return filtered;
+  }
+
+  buildMemories(entries, todayKey, currentWeight) {
+    const today = new Date(todayKey + 'T00:00:00');
+    return [1, 2].map(yearsAgo => {
+      const d = new Date(today);
+      d.setFullYear(d.getFullYear() - yearsAgo);
+      const key = this.localDateKey(d);
+      const e = entries[key];
+      if (!e) return null;
+      const diff = Math.round((currentWeight - e.weight) * 10) / 10;
+      return {
+        mKey: key,
+        yearLabel: `${yearsAgo}年前の今日`,
+        dateLabel: this.formatDateJa(key),
+        weight: e.weight.toFixed(1),
+        memo: e.memo || '',
+        diffText: diff > 0 ? `+${diff.toFixed(1)}kg` : `${diff.toFixed(1)}kg`,
+        diffColor: diff > 0 ? '#b1503c' : (diff < 0 ? '#6b8f5e' : '#8a7355'),
+        onClick: () => this.openDayModal(key),
+      };
+    }).filter(Boolean);
+  }
+
+  buildMemoFeed(entries, todayKey) {
+    const cutoff = new Date(todayKey + 'T00:00:00');
+    cutoff.setDate(cutoff.getDate() - 200);
+    const keys = Object.keys(entries)
+      .filter(k => entries[k].memo && entries[k].memo.trim() !== '' && new Date(k + 'T00:00:00') >= cutoff)
+      .sort().reverse();
+    return keys.slice(0, 6).map(k => ({
+      mKey: k,
+      dateLabel: this.formatDateJa(k),
+      weight: entries[k].weight.toFixed(1),
+      memo: entries[k].memo,
+      onClick: () => this.openDayModal(k),
+    }));
+  }
+
+  buildWeeklyStampCounts(entries, todayKey) {
+    const today = new Date(todayKey + 'T00:00:00');
+    const cutoff = new Date(today);
+    cutoff.setDate(cutoff.getDate() - 6);
+    const counts = {};
+    Object.keys(entries).forEach(k => {
+      const d = new Date(k + 'T00:00:00');
+      if (d >= cutoff && d <= today) {
+        (entries[k].stamps || []).forEach(id => { counts[id] = (counts[id] || 0) + 1; });
+      }
+    });
+    return STAMP_DEFS.map(d => ({ ...d, count: counts[d.id] || 0, color: STAMP_COLORS[d.id] })).filter(x => x.count > 0);
+  }
+
+  buildGraphPoints(entries, stampMode) {
+    const keys = Object.keys(entries).sort();
+    const CH = 300;
+    if (!keys.length) return { points: [], graphGrid: [], chartH: CH, baselineY: CH - 22 };
+    const weights = keys.map(k => entries[k].weight);
+    const min = Math.min(...weights) - 0.6;
+    const max = Math.max(...weights) + 0.6;
+    const w = 376, padL = 34, padR = 12, padT = 26, padB = 22;
+    const innerW = w - padL - padR, innerH = CH - padT - padB;
+    const n = keys.length;
+    const keyStamps = ['undou', 'osake', 'tabesugi'];
+    const toY = (val) => padT + innerH - ((val - min) / (max - min)) * innerH;
+    const points = keys.map((k, i) => {
+      const e = entries[k];
+      const x = n <= 1 ? padL : padL + (innerW * i) / (n - 1);
+      const y = toY(e.weight);
+      const rawStampId = e.stamps && e.stamps.length ? e.stamps[0] : null;
+      const showStamp = stampMode === 'none' ? false : stampMode === 'key' ? (rawStampId && keyStamps.includes(rawStampId)) : !!rawStampId;
+      const isFirst = i === 0, isLast = i === n - 1;
+      return {
+        pKey: k,
+        x: Math.round(x * 10) / 10,
+        y: Math.round(y * 10) / 10,
+        markerY: Math.round((y - 11) * 10) / 10,
+        hasStamp: !!showStamp,
+        dotColor: showStamp ? STAMP_COLORS[rawStampId] : 'transparent',
+        r: isFirst || isLast ? 4 : 2.4,
+        showLabel: isFirst || isLast,
+        labelText: (isFirst || isLast) ? `${e.weight.toFixed(1)}kg` : '',
+        labelLeftPct: Math.round((x / w) * 1000) / 10,
+        labelTopPct: Math.round(((y - 15) / CH) * 1000) / 10,
+        labelTransform: isFirst ? 'translate(2px,-50%)' : 'translate(calc(-100% - 2px),-50%)',
+      };
+    });
+    const gridSteps = [max, min + (max - min) / 2, min];
+    const graphGrid = gridSteps.map((val, i) => ({
+      gKey: `g${i}`,
+      y: Math.round(toY(val) * 10) / 10,
+      topPct: Math.round((toY(val) / CH) * 1000) / 10,
+      label: val.toFixed(1),
+    }));
+    return { points, graphGrid, chartH: CH, baselineY: CH - padB };
+  }
+
+  buildGraphPath(points) {
+    if (!points.length) return '';
+    return points.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x},${p.y}`).join(' ');
+  }
+
+  buildGraphArea(points, baselineY) {
+    if (!points.length) return '';
+    const first = points[0], last = points[points.length - 1];
+    return `M${first.x},${baselineY} ` + points.map(p => `L${p.x},${p.y}`).join(' ') + ` L${last.x},${baselineY} Z`;
+  }
+
+  buildStampDefs(selected, toggle) {
+    return STAMP_DEFS.map(d => {
+      const sel = selected.includes(d.id);
+      const c = STAMP_COLORS[d.id];
+      return {
+        ...d,
+        onClick: () => toggle(d.id),
+        bg: sel ? c : '#fffcf5',
+        color: sel ? '#fffcf5' : c,
+        border: sel ? c : '#e3d5b8',
+        isTabesugiIcon: d.id === 'tabesugi',
+        isOsakeIcon: d.id === 'osake',
+        isUndouIcon: d.id === 'undou',
+        isBenzuuIcon: d.id === 'benzuu',
+        isGohoubiIcon: d.id === 'gohoubi',
+        isGanbattaIcon: d.id === 'ganbatta',
+      };
+    });
+  }
+
+  toggleStamp(id) {
+    this.setState(s => {
+      const has = s.selectedStamps.includes(id);
+      return { selectedStamps: has ? s.selectedStamps.filter(x => x !== id) : [...s.selectedStamps, id] };
+    });
+  }
+
+  toggleDayModalStamp(id) {
+    this.setState(s => {
+      const has = s.dayModalStamps.includes(id);
+      return { dayModalStamps: has ? s.dayModalStamps.filter(x => x !== id) : [...s.dayModalStamps, id] };
+    });
+  }
+
+  keypadPress(ch) {
+    this.setState(s => {
+      if (s.keypadValue.length >= 5) return null;
+      if (ch === '.' && s.keypadValue.includes('.')) return null;
+      if (ch === '.' && s.keypadValue === '') return { keypadValue: '0.' };
+      return { keypadValue: s.keypadValue + ch };
+    });
+  }
+
+  keypadBackspace() {
+    this.setState(s => ({ keypadValue: s.keypadValue.slice(0, -1) }));
+  }
+
+  saveToday() {
+    const v = parseFloat(this.state.keypadValue);
+    if (isNaN(v) || v <= 0) return;
+    const rounded = Math.round(v * 10) / 10;
+    this.setState({ saving: true });
+    setTimeout(() => {
+      this.setState(s => ({
+        entries: { ...s.entries, [s.todayKey]: { weight: rounded, stamps: s.selectedStamps, memo: s.memoValue } },
+        saving: false,
+        forceKeypadToday: false,
+        notif: { visible: true, text: '記録しました。よくできました' },
+      }));
+      setTimeout(() => this.setState({ notif: { visible: false, text: '' } }), 2800);
+    }, 550);
+  }
+
+  editTodayAgain() {
+    const e = this.state.entries[this.state.todayKey];
+    this.setState({
+      forceKeypadToday: true,
+      keypadValue: e ? String(e.weight) : '',
+      selectedStamps: e ? [...e.stamps] : [],
+      memoValue: e ? e.memo : '',
+      memoOpen: !!(e && e.memo),
+    });
+  }
+
+  changeMonth(delta) {
+    this.setState(s => {
+      let m = s.calendarMonth + delta, y = s.calendarYear;
+      if (m < 0) { m = 11; y -= 1; }
+      if (m > 11) { m = 0; y += 1; }
+      return { calendarMonth: m, calendarYear: y };
+    });
+  }
+
+  changeYear(delta) {
+    this.setState(s => ({ calendarYear: s.calendarYear + delta }));
+  }
+
+  openDayModal(dateKey) {
+    if (!dateKey) return;
+    const e = this.state.entries[dateKey];
+    this.setState({
+      dayModalDate: dateKey,
+      dayModalWeight: e ? String(e.weight) : '',
+      dayModalStamps: e ? [...e.stamps] : [],
+      dayModalMemo: e ? e.memo : '',
+    });
+  }
+
+  saveDayModal() {
+    const v = parseFloat(this.state.dayModalWeight);
+    if (isNaN(v) || v <= 0) return;
+    this.setState(s => ({
+      entries: { ...s.entries, [s.dayModalDate]: { weight: Math.round(v * 10) / 10, stamps: s.dayModalStamps, memo: s.dayModalMemo } },
+      dayModalDate: null,
+    }));
+  }
+
+  deleteDayModal() {
+    this.setState(s => {
+      const entries = { ...s.entries };
+      delete entries[s.dayModalDate];
+      return { entries, dayModalDate: null };
+    });
+  }
+
+  completeOnboarding() {
+    const h = parseFloat(this.state.obHeight);
+    const w = parseFloat(this.state.obWeight);
+    const t = parseFloat(this.state.obTarget);
+    if (isNaN(h) || isNaN(w) || isNaN(t)) {
+      this.setState({ obError: true });
+      return;
+    }
+    this.setState({
+      screen: 'app',
+      heightCm: h,
+      targetWeight: t,
+      settingsHeightDraft: String(h),
+      settingsTargetDraft: String(t),
+      obError: false,
+    });
+  }
+
+  previewNotif() {
+    this.setState({ notif: { visible: true, text: 'カレンダーの今日のマスが空いてますよ' } });
+    setTimeout(() => this.setState({ notif: { visible: false, text: '' } }), 3200);
+  }
+
+  renderVals() {
+    const s = this.state;
+    const accent = this.props.accentColor || '#c9762e';
+    const accentDark = `color-mix(in srgb, ${accent} 78%, black)`;
+    const accentFaint = `color-mix(in srgb, ${accent} 14%, transparent)`;
+    const keys = Object.keys(s.entries).sort();
+    const currentWeight = keys.length ? s.entries[keys[keys.length - 1]].weight : s.startWeight;
+    const lostSoFar = (Math.round((s.startWeight - currentWeight) * 10) / 10).toFixed(1);
+    const remaining = (Math.round((currentWeight - s.targetWeight) * 10) / 10).toFixed(1);
+    const todayEntry = s.entries[s.todayKey] || null;
+    const showKeypadForToday = !todayEntry || s.forceKeypadToday;
+    const todayAlreadyLogged = !!todayEntry && !s.forceKeypadToday;
+    const cells = this.buildCalendarCells(s.calendarYear, s.calendarMonth, s.entries, s.todayKey, accent);
+    const periodEntries = this.filterEntriesByPeriod(s.entries, s.graphPeriod, s.todayKey);
+    const graphData = this.buildGraphPoints(periodEntries, s.graphStampMode);
+    const points = graphData.points;
+    const weeklyStampCounts = this.buildWeeklyStampCounts(s.entries, s.todayKey);
+    const bmi = (currentWeight / Math.pow(s.heightCm / 100, 2)).toFixed(1);
+    const dayDiff = keys.length >= 2 ? Math.round((s.entries[keys[keys.length - 1]].weight - s.entries[keys[keys.length - 2]].weight) * 10) / 10 : null;
+    const dayDiffText = dayDiff === null ? '–' : (dayDiff > 0 ? `+${dayDiff.toFixed(1)}` : dayDiff.toFixed(1));
+    const dayDiffColor = dayDiff === null ? '#8a7355' : (dayDiff > 0 ? '#b1503c' : (dayDiff < 0 ? '#6b8f5e' : '#8a7355'));
+    const periodDefs = [
+      { id: 'week', label: '1週間' },
+      { id: 'month', label: '1ヶ月' },
+      { id: '3month', label: '3ヶ月' },
+      { id: 'all', label: '全期間' },
+    ].map(p => ({
+      ...p, onClick: () => this.setState({ graphPeriod: p.id }),
+      bg: s.graphPeriod === p.id ? accent : 'transparent',
+      color: s.graphPeriod === p.id ? '#fffcf5' : '#8a7355',
+    }));
+    const stampModeDefs = [
+      { id: 'none', label: '非表示' },
+      { id: 'key', label: '主要3種' },
+      { id: 'all', label: 'すべて' },
+    ].map(m => ({
+      ...m, onClick: () => this.setState({ graphStampMode: m.id }),
+      bg: s.graphStampMode === m.id ? accent : 'transparent',
+      color: s.graphStampMode === m.id ? '#fffcf5' : '#8a7355',
+    }));
+    const canSave = !isNaN(parseFloat(s.keypadValue)) && parseFloat(s.keypadValue) > 0;
+
+    const keypadKeys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '.', '0', '⌫'].map((label, i) => ({
+      label,
+      onClick: label === '⌫' ? () => this.keypadBackspace() : () => this.keypadPress(label),
+    }));
+
+    const tabDefs = [
+      { id: 'input', label: '入力', isInput: true },
+      { id: 'calendar', label: 'カレンダー', isCalendar: true },
+      { id: 'graph', label: 'グラフ', isGraph: true },
+      { id: 'settings', label: '設定', isSettings: true },
+    ].map(t => ({
+      ...t,
+      onClick: () => this.setState({ activeTab: t.id }),
+      color: s.activeTab === t.id ? accent : '#a89877',
+    }));
+
+    return {
+      isOnboarding: s.screen === 'onboarding',
+      isApp: s.screen === 'app',
+      isTabInput: s.activeTab === 'input',
+      isTabCalendar: s.activeTab === 'calendar',
+      isTabGraph: s.activeTab === 'graph',
+      isTabSettings: s.activeTab === 'settings',
+
+      obHeight: s.obHeight, obWeight: s.obWeight, obTarget: s.obTarget,
+      setObHeight: e => this.setState({ obHeight: e.target.value, obError: false }),
+      setObWeight: e => this.setState({ obWeight: e.target.value, obError: false }),
+      setObTarget: e => this.setState({ obTarget: e.target.value, obError: false }),
+      obError: s.obError,
+      obBtnBg: accent,
+      obBtnColor: '#fffcf5',
+      obBtnShadow: `0 6px 18px color-mix(in srgb, ${accent} 35%, transparent)`,
+      completeOnboarding: () => this.completeOnboarding(),
+
+      todayLabel: this.formatDateJa(s.todayKey),
+      showKeypadForToday,
+      todayAlreadyLogged,
+      todayWeightDisplay: todayEntry ? todayEntry.weight.toFixed(1) : '',
+      todayStampIcons: this.stampIconsFor(todayEntry ? todayEntry.stamps : [], 'today'),
+      editTodayAgain: () => this.editTodayAgain(),
+      goToCalendarTab: () => this.setState({ activeTab: 'calendar' }),
+
+      keypadDisplay: s.keypadValue === '' ? '--' : s.keypadValue,
+      keypadKeys,
+      memoOpen: s.memoOpen,
+      toggleMemo: () => this.setState(st => ({ memoOpen: !st.memoOpen })),
+      memoValue: s.memoValue,
+      setMemoValue: e => this.setState({ memoValue: e.target.value }),
+
+      inputStampDefs: this.buildStampDefs(s.selectedStamps, id => this.toggleStamp(id)),
+      dayModalStampDefs: this.buildStampDefs(s.dayModalStamps, id => this.toggleDayModalStamp(id)),
+
+      saveDisabled: !canSave,
+      saveBtnBg: s.saving ? accentDark : (canSave ? accent : '#e9ddc4'),
+      saveBtnColor: canSave ? '#fffcf5' : '#b9a988',
+      saveBtnScale: s.saving ? 'scale(0.97)' : 'scale(1)',
+      saveBtnLabel: s.saving ? '保存中…' : '保存する',
+      saveToday: () => this.saveToday(),
+
+      monthLabel: `${s.calendarYear}年${s.calendarMonth + 1}月`,
+      calendarCells: cells,
+      memoFeed: this.buildMemoFeed(s.entries, s.todayKey),
+      memories: this.buildMemories(s.entries, s.todayKey, currentWeight),
+      prevMonth: () => this.changeMonth(-1),
+      nextMonth: () => this.changeMonth(1),
+      prevYear: () => this.changeYear(-1),
+      nextYear: () => this.changeYear(1),
+
+      dayModalOpen: !!s.dayModalDate,
+      dayModalDateLabel: s.dayModalDate ? this.formatDateJa(s.dayModalDate) : '',
+      dayModalWeight: s.dayModalWeight,
+      setDayModalWeight: e => this.setState({ dayModalWeight: e.target.value }),
+      dayModalMemo: s.dayModalMemo,
+      setDayModalMemo: e => this.setState({ dayModalMemo: e.target.value }),
+      hasExistingDayEntry: !!(s.dayModalDate && s.entries[s.dayModalDate]),
+      saveDayModal: () => this.saveDayModal(),
+      deleteDayModal: () => this.deleteDayModal(),
+      closeDayModal: () => this.setState({ dayModalDate: null }),
+
+      lostSoFar,
+      remaining,
+      dayDiffText,
+      dayDiffColor,
+      bmi,
+      weeklyStampCounts,
+      periodDefs,
+      stampModeDefs,
+      graphPoints: points,
+      graphGrid: graphData.graphGrid,
+      graphChartH: graphData.chartH,
+      graphPath: this.buildGraphPath(points),
+      graphArea: this.buildGraphArea(points, graphData.baselineY),
+
+      settingsHeightDraft: s.settingsHeightDraft,
+      settingsTargetDraft: s.settingsTargetDraft,
+      setSettingsHeight: e => this.setState({ settingsHeightDraft: e.target.value }),
+      setSettingsTarget: e => this.setState({ settingsTargetDraft: e.target.value }),
+      settingsSaveLabel: s.settingsSaved ? '保存しました' : '保存する',
+      saveSettingsGoal: () => {
+        const h = parseFloat(this.state.settingsHeightDraft);
+        const t = parseFloat(this.state.settingsTargetDraft);
+        this.setState({
+          heightCm: !isNaN(h) ? h : this.state.heightCm,
+          targetWeight: !isNaN(t) ? t : this.state.targetWeight,
+          settingsSaved: true,
+        });
+        setTimeout(() => this.setState({ settingsSaved: false }), 1800);
+      },
+
+      reminderTrackBg: s.reminderEnabled ? accent : '#e3d5b8',
+      reminderKnobLeft: s.reminderEnabled ? '20px' : '2px',
+      toggleReminder: () => this.setState(st => ({ reminderEnabled: !st.reminderEnabled })),
+      reminderTime: s.reminderTime,
+      setReminderTime: e => this.setState({ reminderTime: e.target.value }),
+      previewNotif: () => this.previewNotif(),
+
+      notifTransform: s.notif.visible ? 'translateY(0)' : 'translateY(-140%)',
+      notifOpacity: s.notif.visible ? 1 : 0,
+      notifText: s.notif.text,
+
+      tabDefs,
+      accent,
+      accentDark,
+      accentFaint,
+      phoneZoom: s.viewportScale,
+    };
+  }
+}
+
+</script>
+</body>
+</html>
