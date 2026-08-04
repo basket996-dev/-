@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Badge circle, echoing the in-app "がんばった" (well done) stamp motif -->
+    <path
+        android:fillColor="#A2632E"
+        android:pathData="M54,22 A32,32 0 1,1 54,86 A32,32 0 1,1 54,22 Z" />
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#FFFCF5"
+        android:strokeWidth="7"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M38.6,57.3 L47.4,66.1 L69.4,41.9" />
+</vector>
