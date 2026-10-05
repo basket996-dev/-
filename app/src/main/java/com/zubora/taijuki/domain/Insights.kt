@@ -77,6 +77,12 @@ fun dayDiff(entries: Map<LocalDate, Entry>): Double? {
     return round1(newestTwo[0].value.weight - newestTwo[1].value.weight)
 }
 
+/** [dayDiff] compares the two newest entries, so it's only a true 前日比 when they're on consecutive days. */
+fun dayDiffLabel(entries: Map<LocalDate, Entry>): String {
+    val newestTwo = entries.keys.sortedDescending().take(2)
+    return if (newestTwo.size < 2 || newestTwo[1].plusDays(1) == newestTwo[0]) "前日比" else "前回比"
+}
+
 fun computeBmi(weightKg: Double, heightCm: Double): String {
     val heightM = heightCm / 100.0
     return (weightKg / (heightM * heightM)).toFixed1()
