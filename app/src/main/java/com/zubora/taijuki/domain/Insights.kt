@@ -16,9 +16,12 @@ data class MemoryItem(
     val diffColor: Color,
 )
 
-/** Same date, 1 and 2 years back — only surfaced once that much history actually exists. */
-fun buildMemories(entries: Map<LocalDate, Entry>, today: LocalDate, currentWeight: Double): List<MemoryItem> =
-    listOf(1, 2).mapNotNull { yearsAgo ->
+/** Same date, every year back as far as the data goes. */
+fun buildMemories(entries: Map<LocalDate, Entry>, today: LocalDate, currentWeight: Double): List<MemoryItem> {
+    val oldestYear = entries.keys.minOfOrNull { it.year } ?: return emptyList()
+    val maxYearsAgo = today.year - oldestYear
+    if (maxYearsAgo < 1) return emptyList()
+    return (1..maxYearsAgo).mapNotNull { yearsAgo ->
         val date = today.minusYears(yearsAgo.toLong())
         val e = entries[date] ?: return@mapNotNull null
         val diff = round1(currentWeight - e.weight)
@@ -33,6 +36,7 @@ fun buildMemories(entries: Map<LocalDate, Entry>, today: LocalDate, currentWeigh
             diffColor = diffColor(diff),
         )
     }
+}
 
 data class MemoFeedItem(
     val date: LocalDate,
