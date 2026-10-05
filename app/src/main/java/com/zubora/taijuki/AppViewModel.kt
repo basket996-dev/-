@@ -16,6 +16,7 @@ import com.zubora.taijuki.data.StampMode
 import com.zubora.taijuki.data.toDomain
 import com.zubora.taijuki.data.toEntity
 import com.zubora.taijuki.domain.keypadSeed
+import com.zubora.taijuki.domain.parseCsv
 import com.zubora.taijuki.domain.round1
 import com.zubora.taijuki.reminder.AlarmScheduler
 import com.zubora.taijuki.ui.theme.AppColors
@@ -308,6 +309,24 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
             _uiState.update { it.copy(notif = NotifState(true, "カレンダーの今日のマスが空いてますよ")) }
             delay(3200)
             _uiState.update { it.copy(notif = NotifState()) }
+        }
+    }
+
+    fun showNotif(text: String) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(notif = NotifState(true, text)) }
+            delay(2800)
+            _uiState.update { it.copy(notif = NotifState()) }
+        }
+    }
+
+    fun importCsv(csv: String) {
+        viewModelScope.launch {
+            val entries = withContext(Dispatchers.Default) { parseCsv(csv) }
+            withContext(Dispatchers.IO) { entries.forEach { entryDao.upsert(it.toEntity()) } }
+            showNotif(
+                if (entries.isEmpty()) "読み込めるデータがありませんでした" else "${entries.size}件のデータを読み込みました",
+            )
         }
     }
 

@@ -3,6 +3,7 @@ package com.zubora.taijuki.ui.screens
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Build
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.animateDpAsState
@@ -36,10 +37,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
@@ -50,10 +51,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.core.content.ContextCompat
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount
+import com.google.android.gms.common.api.ApiException
 import com.zubora.taijuki.AppViewModel
 import com.zubora.taijuki.UiState
+import com.zubora.taijuki.backup.DriveBackup
+import com.zubora.taijuki.data.Entry
 import com.zubora.taijuki.data.GraphPeriod
 import com.zubora.taijuki.data.StampMode
+import com.zubora.taijuki.domain.buildCsv
 import com.zubora.taijuki.reminder.AlarmScheduler
 import com.zubora.taijuki.ui.components.BoxNumberField
 import com.zubora.taijuki.ui.components.CheckGlyph
@@ -61,6 +68,10 @@ import com.zubora.taijuki.ui.components.SegmentedControl
 import com.zubora.taijuki.ui.theme.AppColors
 import com.zubora.taijuki.ui.theme.AppTypography
 import com.zubora.taijuki.ui.theme.accentDark
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.time.LocalDate
 
 @Composable
 fun SettingsScreen(uiState: UiState, viewModel: AppViewModel) {
@@ -200,10 +211,25 @@ fun SettingsScreen(uiState: UiState, viewModel: AppViewModel) {
                 .padding(18.dp),
         ) {
             SectionTitle("データ", bottomPadding = 12.dp)
-            Column(verticalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.alpha(0.55f)) {
-                ComingSoonRow("Googleドライブへバックアップ")
-                ComingSoonRow("CSV出力")
-                ComingSoonRow("BMI自動計算")
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                CsvExportRow(
+                    entries = uiState.entries.values,
+                    accent = accent,
+                    onExported = { viewModel.showNotif("CSVを書き出しました") },
+                )
+                CsvImportRow(
+                    accent = accent,
+                    onImport = viewModel::importCsv,
+                )
+                DriveBackupRow(
+                    entries = uiState.entries.values,
+                    accent = accent,
+                    onResult = { success ->
+                        viewModel.showNotif(
+                            if (success) "Googleドライブに保存しました" else "バックアップに失敗しました。設定をご確認ください",
+                        )
+                    },
+                )
             }
         }
     }
@@ -242,20 +268,105 @@ private fun FieldLabel(text: String, bottomPadding: Dp = 6.dp) {
 }
 
 @Composable
-private fun ComingSoonRow(label: String) {
+private fun CsvExportRow(entries: Collection<Entry>, accent: Color, onExported: () -> Unit) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("text/csv")) { uri ->
+        if (uri == null) return@rememberLauncherForActivityResult
+        scope.launch {
+            withContext(Dispatchers.IO) {
+                context.contentResolver.openOutputStream(uri)?.use { it.write(buildCsv(entries).toByteArray()) }
+            }
+            onExported()
+        }
+    }
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(label, style = AppTypography.bodySmall.copy(fontSize = 13.sp, color = AppColors.TextPrimary))
+        Text("CSV出力", style = AppTypography.bodySmall.copy(fontSize = 13.sp, color = AppColors.TextPrimary))
         Box(
             modifier = Modifier
                 .clip(RoundedCornerShape(100))
-                .background(AppColors.BorderLight)
-                .padding(horizontal = 8.dp, vertical = 3.dp),
+                .border(1.dp, accent, RoundedCornerShape(100))
+                .clickable { launcher.launch("zubora_taijuki_${LocalDate.now()}.csv") }
+                .padding(horizontal = 10.dp, vertical = 3.dp),
         ) {
-            Text("近日公開", style = AppTypography.labelSmall.copy(fontSize = 10.sp, color = AppColors.TextSecondary))
+            Text("書き出す", style = AppTypography.labelSmall.copy(fontSize = 10.sp, color = accentDark(accent)))
+        }
+    }
+}
+
+@Composable
+private fun CsvImportRow(accent: Color, onImport: (String) -> Unit) {
+    val context = LocalContext.current
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+        if (uri == null) return@rememberLauncherForActivityResult
+        val content = context.contentResolver.openInputStream(uri)?.bufferedReader()?.use { it.readText() }
+        if (content != null) onImport(content)
+    }
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text("CSV読み込み", style = AppTypography.bodySmall.copy(fontSize = 13.sp, color = AppColors.TextPrimary))
+        Box(
+            modifier = Modifier
+                .clip(RoundedCornerShape(100))
+                .border(1.dp, accent, RoundedCornerShape(100))
+                .clickable { launcher.launch("text/*") }
+                .padding(horizontal = 10.dp, vertical = 3.dp),
+        ) {
+            Text("読み込む", style = AppTypography.labelSmall.copy(fontSize = 10.sp, color = accentDark(accent)))
+        }
+    }
+}
+
+@Composable
+private fun DriveBackupRow(entries: Collection<Entry>, accent: Color, onResult: (Boolean) -> Unit) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+
+    fun runUpload(account: GoogleSignInAccount) {
+        scope.launch {
+            val success = withContext(Dispatchers.IO) {
+                runCatching { DriveBackup.upload(context, account, buildCsv(entries)) }
+                    .onFailure { Log.e("DriveBackup", "upload failed", it) }
+                    .isSuccess
+            }
+            onResult(success)
+        }
+    }
+
+    val signInLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        val account = try {
+            GoogleSignIn.getSignedInAccountFromIntent(result.data).getResult(ApiException::class.java)
+        } catch (e: ApiException) {
+            Log.e("DriveBackup", "sign-in failed, statusCode=${e.statusCode}", e)
+            null
+        }
+        if (account != null) runUpload(account) else onResult(false)
+    }
+
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text("Googleドライブへバックアップ", style = AppTypography.bodySmall.copy(fontSize = 13.sp, color = AppColors.TextPrimary))
+        Box(
+            modifier = Modifier
+                .clip(RoundedCornerShape(100))
+                .border(1.dp, accent, RoundedCornerShape(100))
+                .clickable {
+                    val existing = DriveBackup.lastSignedInAccount(context)
+                    if (existing != null) runUpload(existing) else signInLauncher.launch(DriveBackup.signInClient(context).signInIntent)
+                }
+                .padding(horizontal = 10.dp, vertical = 3.dp),
+        ) {
+            Text("バックアップする", style = AppTypography.labelSmall.copy(fontSize = 10.sp, color = accentDark(accent)))
         }
     }
 }
