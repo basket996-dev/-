@@ -10,3 +10,14 @@
 local.properties
 /app/build
 /app/release
+
+# VoiceInput local model storage (multi-GB files, not project source)
+/音声ai/
+
+/remindai/build
+/remindai/release
+
+# RemindAI のリリース署名鍵。絶対にコミットしない。
+# 漏れると他人が「同じアプリの更新」を作れてしまい、失うと自分が更新を出せなくなる。
+/remindai/keystore.properties
+/remindai/*.jks
