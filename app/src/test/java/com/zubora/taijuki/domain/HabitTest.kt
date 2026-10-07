@@ -126,6 +126,32 @@ class HabitTest {
     }
 
     @Test
+    fun keypadKeepsAWeightShapedValue() {
+        assertEquals("7", keypadAppend("", "7"))
+        assertEquals("0.", keypadAppend("", "."))
+        assertEquals("65.", keypadAppend("65.", "."))
+        assertEquals("65.45", keypadAppend("65.4", "5"))
+        assertEquals("65.45", keypadAppend("65.45", "6"))
+    }
+
+    @Test
+    fun widgetSaysWhetherTodayIsDone() {
+        val recorded = widgetState(65.4, LocalDate.of(2026, 10, 5), 65.7, today, 2)
+        assertTrue(recorded.recordedToday)
+        assertEquals("今日 65.4kg", recorded.headline)
+        assertEquals("前回より -0.3kg", recorded.detail)
+
+        val pending = widgetState(null, LocalDate.of(2026, 10, 5), 65.7, today, 1)
+        assertFalse(pending.recordedToday)
+        assertEquals("今日はまだです", pending.headline)
+        assertEquals("前回 65.7kg（10/5）", pending.detail)
+        assertEquals(1, pending.week.count)
+
+        assertEquals("4日ぶりでも大丈夫", widgetState(null, LocalDate.of(2026, 10, 2), 65.7, today, 0).headline)
+        assertEquals("まだ記録がありません", widgetState(null, null, null, today, 0).headline)
+    }
+
+    @Test
     fun stampNamesStayCsvSafe() {
         assertEquals("ラーメン", sanitizeStampLabel(" ラーメン "))
         assertEquals("外食・コンビニ", sanitizeStampLabel("外食 コンビニ"))

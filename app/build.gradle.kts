@@ -67,6 +67,7 @@ dependencies {
     ksp("androidx.room:room-compiler:2.6.1")
 
     implementation("androidx.datastore:datastore-preferences:1.1.1")
+    implementation("androidx.glance:glance-appwidget:1.1.1")
     implementation("androidx.exifinterface:exifinterface:1.3.7")
 
     implementation("com.google.android.gms:play-services-auth:21.2.0")

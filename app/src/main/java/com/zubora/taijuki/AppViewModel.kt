@@ -22,6 +22,7 @@ import com.zubora.taijuki.data.toEntity
 import com.zubora.taijuki.domain.COMEBACK_GAP_DAYS
 import com.zubora.taijuki.domain.daysSinceLastRecord
 import com.zubora.taijuki.domain.firstGrapheme
+import com.zubora.taijuki.domain.keypadAppend
 import com.zubora.taijuki.domain.keypadSeed
 import com.zubora.taijuki.domain.parseCsv
 import com.zubora.taijuki.domain.round1
@@ -31,6 +32,7 @@ import com.zubora.taijuki.reminder.NotificationHelper
 import com.zubora.taijuki.reminder.ReminderContent
 import com.zubora.taijuki.ui.theme.AppColors
 import com.zubora.taijuki.ui.theme.CustomStampColors
+import com.zubora.taijuki.widget.WeightWidget
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -172,17 +174,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     fun goToCalendarTab() = setActiveTab(Tab.Calendar)
 
     // ---- input keypad ----
-    fun keypadPress(ch: String) {
-        _uiState.update { s ->
-            val v = s.keypadValue
-            when {
-                v.length >= 5 -> s
-                ch == "." && v.contains(".") -> s
-                ch == "." && v.isEmpty() -> s.copy(keypadValue = "0.")
-                else -> s.copy(keypadValue = v + ch)
-            }
-        }
-    }
+    fun keypadPress(ch: String) = _uiState.update { it.copy(keypadValue = keypadAppend(it.keypadValue, ch)) }
 
     fun keypadBackspace() = _uiState.update { it.copy(keypadValue = it.keypadValue.dropLast(1)) }
 
@@ -204,6 +196,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
             delay(550)
             entryDao.upsert(Entry(s.today, round1(value), s.selectedStamps, s.memoValue, recordedAt).toEntity())
             NotificationHelper.cancelReminder(app)
+            WeightWidget.refresh(app)
             val message = if (s.todayEntry == null && gap != null && gap >= COMEBACK_GAP_DAYS) {
                 "おかえりなさい！${gap}日ぶりの記録です"
             } else {
@@ -270,6 +263,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         val recordedAt = s.entries[dm.date]?.recordedAt ?: if (dm.date == s.today) System.currentTimeMillis() else null
         viewModelScope.launch {
             entryDao.upsert(Entry(dm.date, round1(value), dm.stamps, dm.memo, recordedAt).toEntity())
+            WeightWidget.refresh(app)
             _uiState.update { it.copy(dayModal = null) }
         }
     }
@@ -278,6 +272,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         val dm = _uiState.value.dayModal ?: return
         viewModelScope.launch {
             entryDao.deleteByDate(dm.date.toString())
+            WeightWidget.refresh(app)
             _uiState.update { it.copy(dayModal = null) }
         }
     }
@@ -301,7 +296,10 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun setAccentIndex(index: Int) {
-        viewModelScope.launch { settingsRepository.setAccentIndex(index) }
+        viewModelScope.launch {
+            settingsRepository.setAccentIndex(index)
+            WeightWidget.refresh(app)
+        }
     }
 
     fun setGraphPeriod(period: GraphPeriod) {
@@ -381,6 +379,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
                     entryDao.upsert(entry.toEntity())
                 }
             }
+            WeightWidget.refresh(app)
             showNotif(
                 if (rows.isEmpty()) "読み込めるデータがありませんでした" else "${rows.size}件のデータを読み込みました",
             )

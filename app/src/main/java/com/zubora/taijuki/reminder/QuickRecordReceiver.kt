@@ -5,9 +5,9 @@ import android.content.Context
 import android.content.Intent
 import androidx.core.app.RemoteInput
 import com.zubora.taijuki.ZuboraApplication
-import com.zubora.taijuki.data.EntryEntity
+import com.zubora.taijuki.data.TodayRecorder
 import com.zubora.taijuki.domain.parseQuickWeight
-import com.zubora.taijuki.domain.recordedCopy
+import com.zubora.taijuki.widget.WeightWidget
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -28,18 +28,9 @@ class QuickRecordReceiver : BroadcastReceiver() {
                     NotificationHelper.showReminder(app, ReminderContent.load(app, today), error = "数字で入れてください（例 77.5）")
                     return@launch
                 }
-                val dao = app.database.entryDao()
-                val existing = dao.getByDate(today.toString())
-                val previous = dao.getLatestBefore(today.toString())
-                // Keep any stamps or memo already on today; only the weight comes from the notification.
-                dao.upsert(
-                    (existing ?: EntryEntity(date = today.toString(), weight = weight, stamps = "", memo = "")).copy(
-                        weight = weight,
-                        recordedAt = existing?.recordedAt ?: System.currentTimeMillis(),
-                    ),
-                )
-                val copy = recordedCopy(weight, previous?.date?.let(LocalDate::parse), previous?.weight, today)
+                val copy = TodayRecorder.save(app.database.entryDao(), weight, today)
                 NotificationHelper.showRecorded(app, copy)
+                WeightWidget.refresh(app)
             } finally {
                 pendingResult.finish()
             }

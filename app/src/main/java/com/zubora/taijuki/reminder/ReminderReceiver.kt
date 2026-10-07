@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import com.zubora.taijuki.ZuboraApplication
+import com.zubora.taijuki.widget.WeightWidget
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
@@ -25,6 +26,8 @@ class ReminderReceiver : BroadcastReceiver() {
                     if (todayEntry == null) {
                         NotificationHelper.showReminder(appContext, ReminderContent.load(app, today))
                     }
+                    // Fires once a day, so it's also a good moment to roll the widget over to the new day.
+                    WeightWidget.refresh(appContext)
                     // Exact daily alarms aren't repeating, so re-arm for tomorrow.
                     AlarmScheduler.schedule(appContext, AlarmScheduler.parseReminderTime(settings.reminderTime))
                 }

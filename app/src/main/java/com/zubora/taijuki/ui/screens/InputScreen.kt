@@ -46,6 +46,7 @@ import com.zubora.taijuki.domain.weekProgress
 import com.zubora.taijuki.reminder.AlarmScheduler
 import com.zubora.taijuki.ui.components.CheckGlyph
 import com.zubora.taijuki.ui.components.MemoTextArea
+import com.zubora.taijuki.ui.components.NumericKeypad
 import com.zubora.taijuki.ui.components.PencilGlyph
 import com.zubora.taijuki.ui.components.StampPickerGrid
 import com.zubora.taijuki.ui.components.pickerStamps
@@ -166,34 +167,6 @@ private fun KeypadContent(uiState: UiState, viewModel: AppViewModel) {
                     style = AppTypography.titleMedium.copy(fontSize = 16.sp),
                     modifier = Modifier.padding(vertical = 1.dp),
                 )
-            }
-        }
-    }
-}
-
-@Composable
-private fun NumericKeypad(onDigit: (String) -> Unit, onBackspace: () -> Unit) {
-    val keys = listOf("1", "2", "3", "4", "5", "6", "7", "8", "9", ".", "0", "⌫")
-    Column {
-        keys.chunked(3).forEach { row ->
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
-            ) {
-                row.forEach { label ->
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .clip(RoundedCornerShape(14.dp))
-                            .background(AppColors.Card)
-                            .border(1.dp, AppColors.BorderLight, RoundedCornerShape(14.dp))
-                            .clickable { if (label == "⌫") onBackspace() else onDigit(label) }
-                            .padding(vertical = 14.dp),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Text(label, style = AppTypography.titleMedium.copy(fontSize = 19.sp, color = AppColors.TextPrimary))
-                    }
-                }
             }
         }
     }

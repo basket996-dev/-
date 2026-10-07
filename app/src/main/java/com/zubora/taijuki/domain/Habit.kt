@@ -120,6 +120,43 @@ fun suggestReminderTime(
     return ReminderSuggestion(suggested, median / 60)
 }
 
+/** One key press on the weight keypad: at most 5 characters and one decimal point. */
+fun keypadAppend(current: String, key: String): String = when {
+    current.length >= 5 -> current
+    key == "." && current.contains(".") -> current
+    key == "." && current.isEmpty() -> "0."
+    else -> current + key
+}
+
+/** What the home-screen widget says. */
+data class WidgetState(
+    val recordedToday: Boolean,
+    val headline: String,
+    val detail: String,
+    val week: WeekProgress,
+)
+
+fun widgetState(
+    todayWeight: Double?,
+    previousDate: LocalDate?,
+    previousWeight: Double?,
+    today: LocalDate,
+    weekCount: Int,
+): WidgetState {
+    val week = WeekProgress(weekCount)
+    if (todayWeight != null) {
+        val detail = if (previousWeight == null) "はじめての記録です" else "前回より ${dayDiffText(todayWeight - previousWeight)}kg"
+        return WidgetState(true, "今日 ${todayWeight.toFixed1()}kg", detail, week)
+    }
+    if (previousDate == null || previousWeight == null) {
+        return WidgetState(false, "まだ記録がありません", "体重を入れてみましょう", week)
+    }
+    val previous = "前回 ${previousWeight.toFixed1()}kg（${previousDate.monthValue}/${previousDate.dayOfMonth}）"
+    val gap = ChronoUnit.DAYS.between(previousDate, today)
+    val headline = if (gap >= COMEBACK_GAP_DAYS) "${gap}日ぶりでも大丈夫" else "今日はまだです"
+    return WidgetState(false, headline, previous, week)
+}
+
 const val STAMP_LABEL_MAX = 8
 
 /** Stamp names are joined with spaces in the CSV, so spaces and commas become "・". */
