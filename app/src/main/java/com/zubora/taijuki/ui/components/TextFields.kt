@@ -82,6 +82,36 @@ fun BoxNumberField(value: String, onValueChange: (String) -> Unit, modifier: Mod
     )
 }
 
+/** [BoxNumberField]'s look for free text — the stamp name and emoji boxes. */
+@Composable
+fun BoxTextField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    placeholder: String,
+    modifier: Modifier = Modifier,
+) {
+    val textStyle = TextStyle(fontFamily = AppFontFamily, fontSize = 14.sp, color = AppColors.TextPrimary)
+    BasicTextField(
+        value = value,
+        onValueChange = onValueChange,
+        textStyle = textStyle,
+        singleLine = true,
+        cursorBrush = SolidColor(AppColors.TextPrimary),
+        modifier = modifier
+            .background(AppColors.InputBackground, RoundedCornerShape(10.dp))
+            .border(1.dp, AppColors.BorderLight, RoundedCornerShape(10.dp))
+            .padding(horizontal = 12.dp, vertical = 9.dp),
+        decorationBox = { inner ->
+            Box {
+                if (value.isEmpty()) {
+                    Text(placeholder, style = textStyle.copy(color = AppColors.TextPlaceholder))
+                }
+                inner()
+            }
+        },
+    )
+}
+
 /** The card-background memo textarea shared by the input tab and the day-edit sheet. */
 @Composable
 fun MemoTextArea(

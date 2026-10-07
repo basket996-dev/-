@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.sp
 import com.zubora.taijuki.AppViewModel
 import com.zubora.taijuki.UiState
 import com.zubora.taijuki.data.GraphPeriod
+import com.zubora.taijuki.data.Stamp
 import com.zubora.taijuki.domain.buildGraphData
 import com.zubora.taijuki.domain.buildWeeklyStampCounts
 import com.zubora.taijuki.domain.computeBmi
@@ -43,7 +44,6 @@ import com.zubora.taijuki.ui.components.SegmentedControl
 import com.zubora.taijuki.ui.components.WeightLineChart
 import com.zubora.taijuki.ui.theme.AppColors
 import com.zubora.taijuki.ui.theme.AppTypography
-import com.zubora.taijuki.ui.theme.StampType
 
 @Composable
 fun GraphScreen(uiState: UiState, viewModel: AppViewModel) {
@@ -189,7 +189,7 @@ private fun WeeklyStampChips(items: List<Triple<Color, String, Int>>) {
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun ChartLegend(accent: Color, stamps: List<StampType>) {
+private fun ChartLegend(accent: Color, stamps: List<Stamp>) {
     FlowRow(
         modifier = Modifier.padding(start = 4.dp, top = 8.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp),

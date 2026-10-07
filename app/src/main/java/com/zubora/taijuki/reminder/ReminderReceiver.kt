@@ -20,9 +20,10 @@ class ReminderReceiver : BroadcastReceiver() {
                 val app = appContext as ZuboraApplication
                 val settings = app.settingsRepository.settings.first()
                 if (settings.reminderEnabled) {
-                    val todayEntry = app.database.entryDao().getByDate(LocalDate.now().toString())
+                    val today = LocalDate.now()
+                    val todayEntry = app.database.entryDao().getByDate(today.toString())
                     if (todayEntry == null) {
-                        NotificationHelper.showReminder(appContext)
+                        NotificationHelper.showReminder(appContext, ReminderContent.load(app, today))
                     }
                     // Exact daily alarms aren't repeating, so re-arm for tomorrow.
                     AlarmScheduler.schedule(appContext, AlarmScheduler.parseReminderTime(settings.reminderTime))

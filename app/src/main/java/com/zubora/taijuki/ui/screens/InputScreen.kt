@@ -24,21 +24,31 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zubora.taijuki.AppViewModel
 import com.zubora.taijuki.UiState
+import com.zubora.taijuki.domain.ReminderSuggestion
+import com.zubora.taijuki.domain.WeekProgress
+import com.zubora.taijuki.domain.comebackMessage
+import com.zubora.taijuki.domain.daysSinceLastRecord
 import com.zubora.taijuki.domain.formatDateJa
+import com.zubora.taijuki.domain.suggestReminderTime
 import com.zubora.taijuki.domain.toFixed1
+import com.zubora.taijuki.domain.weekProgress
+import com.zubora.taijuki.reminder.AlarmScheduler
 import com.zubora.taijuki.ui.components.CheckGlyph
 import com.zubora.taijuki.ui.components.MemoTextArea
 import com.zubora.taijuki.ui.components.PencilGlyph
 import com.zubora.taijuki.ui.components.StampPickerGrid
+import com.zubora.taijuki.ui.components.pickerStamps
 import com.zubora.taijuki.ui.theme.AppColors
 import com.zubora.taijuki.ui.theme.AppTypography
 import com.zubora.taijuki.ui.theme.StampIcon
@@ -58,6 +68,9 @@ fun InputScreen(uiState: UiState, viewModel: AppViewModel) {
 private fun KeypadContent(uiState: UiState, viewModel: AppViewModel) {
     val accent = uiState.accent
     val scale by animateFloatAsState(if (uiState.saving) 0.97f else 1f, label = "saveScale")
+    val comeback = remember(uiState.entries, uiState.today) {
+        if (uiState.todayEntry != null) null else comebackMessage(daysSinceLastRecord(uiState.entries.keys, uiState.today))
+    }
 
     Column(modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 22.dp, bottom = 4.dp)) {
@@ -67,6 +80,13 @@ private fun KeypadContent(uiState: UiState, viewModel: AppViewModel) {
             )
             Spacer(Modifier.height(2.dp))
             Text("今日の体重を記録", style = AppTypography.titleMedium.copy(fontSize = 19.sp, color = AppColors.TextPrimary))
+            if (comeback != null) {
+                Text(
+                    comeback,
+                    modifier = Modifier.padding(top = 4.dp),
+                    style = AppTypography.bodySmall.copy(fontSize = 12.5.sp, fontWeight = FontWeight.Medium, color = accentDark(accent)),
+                )
+            }
         }
 
         Box(
@@ -94,6 +114,7 @@ private fun KeypadContent(uiState: UiState, viewModel: AppViewModel) {
 
         Column(modifier = Modifier.padding(horizontal = 20.dp)) {
             StampPickerGrid(
+                stamps = pickerStamps(uiState.stamps, uiState.selectedStamps),
                 selected = uiState.selectedStamps,
                 onToggle = viewModel::toggleStamp,
                 modifier = Modifier.padding(bottom = 14.dp),
@@ -101,14 +122,19 @@ private fun KeypadContent(uiState: UiState, viewModel: AppViewModel) {
 
             if (!uiState.memoOpen) {
                 Row(
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(5.dp),
-                    modifier = Modifier
-                        .clickable(onClick = viewModel::toggleMemo)
-                        .padding(bottom = 12.dp),
                 ) {
-                    PencilGlyph(tint = AppColors.TextPlaceholder, modifier = Modifier.size(13.dp))
-                    Text("メモを追加", style = AppTypography.bodySmall.copy(fontSize = 12.sp, color = AppColors.TextPlaceholder))
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(5.dp),
+                        modifier = Modifier.clickable(onClick = viewModel::toggleMemo),
+                    ) {
+                        PencilGlyph(tint = AppColors.TextPlaceholder, modifier = Modifier.size(13.dp))
+                        Text("メモを追加", style = AppTypography.bodySmall.copy(fontSize = 12.sp, color = AppColors.TextPlaceholder))
+                    }
+                    EditStampsLink(onClick = viewModel::openStampManager)
                 }
             } else {
                 MemoTextArea(
@@ -229,6 +255,113 @@ private fun AlreadyLoggedContent(uiState: UiState, viewModel: AppViewModel) {
                 contentPadding = PaddingValues(horizontal = 20.dp, vertical = 11.dp),
             ) {
                 Text("カレンダーを見る", style = AppTypography.labelLarge.copy(fontSize = 13.sp, fontWeight = FontWeight.Bold))
+            }
+        }
+
+        val week = remember(uiState.entries, uiState.today) { weekProgress(uiState.entries.keys, uiState.today) }
+        Spacer(Modifier.height(28.dp))
+        WeekProgressCard(week, accent)
+
+        val settings = uiState.settings
+        val suggestion = remember(uiState.entries, settings.reminderTime, uiState.today) {
+            suggestReminderTime(uiState.entries.values, AlarmScheduler.parseReminderTime(settings.reminderTime), uiState.today)
+        }
+        if (settings.reminderEnabled && suggestion != null && suggestion.label != settings.dismissedReminderSuggestion) {
+            Spacer(Modifier.height(12.dp))
+            ReminderSuggestionCard(
+                suggestion = suggestion,
+                accent = accent,
+                onAccept = { viewModel.acceptReminderSuggestion(suggestion.time) },
+                onDismiss = { viewModel.dismissReminderSuggestion(suggestion.time) },
+            )
+        }
+    }
+}
+
+private val ReminderSuggestion.label: String get() = "%02d:%02d".format(time.hour, time.minute)
+
+@Composable
+private fun EditStampsLink(onClick: () -> Unit) {
+    Text(
+        "スタンプを編集",
+        modifier = Modifier.clickable(onClick = onClick),
+        style = AppTypography.bodySmall.copy(fontSize = 12.sp, color = AppColors.TextPlaceholder),
+    )
+}
+
+/** This week against the 週3回 target — a target that can be met, unlike an unbroken streak. */
+@Composable
+private fun WeekProgressCard(week: WeekProgress, accent: Color) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(AppColors.Card, RoundedCornerShape(16.dp))
+            .border(1.dp, AppColors.BorderCard, RoundedCornerShape(16.dp))
+            .padding(horizontal = 16.dp, vertical = 14.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            Text("今週の記録", style = AppTypography.labelMedium.copy(fontSize = 12.sp, color = AppColors.TextSecondary))
+            repeat(week.target) { i ->
+                Box(
+                    modifier = Modifier
+                        .size(10.dp)
+                        .clip(CircleShape)
+                        .background(if (i < week.count) accent else AppColors.BorderLight),
+                )
+            }
+            Text(
+                if (week.count <= week.target) "${week.count}/${week.target}回" else "${week.count}回",
+                style = AppTypography.labelMedium.copy(fontSize = 12.sp, fontWeight = FontWeight.Bold, color = AppColors.TextPrimary),
+            )
+        }
+        Text(
+            if (week.achieved) "今週の目安（週${week.target}回）達成！あとは気が向いたらでOK" else "あと${week.remaining}回で今週の目安（週${week.target}回）",
+            modifier = Modifier.padding(top = 6.dp),
+            style = AppTypography.bodySmall.copy(fontSize = 12.sp, color = if (week.achieved) accentDark(accent) else AppColors.TextSecondary),
+        )
+    }
+}
+
+@Composable
+private fun ReminderSuggestionCard(
+    suggestion: ReminderSuggestion,
+    accent: Color,
+    onAccept: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(accentFaint(accent), RoundedCornerShape(16.dp))
+            .padding(horizontal = 16.dp, vertical = 14.dp),
+    ) {
+        Text(
+            "いつも${suggestion.usualHour}時台に記録しています",
+            style = AppTypography.bodySmall.copy(fontSize = 12.5.sp, color = AppColors.TextSecondary),
+        )
+        Text(
+            "通知を ${suggestion.label} にしますか？",
+            modifier = Modifier.padding(top = 2.dp),
+            style = AppTypography.bodyMedium.copy(fontSize = 14.sp, fontWeight = FontWeight.Bold, color = AppColors.TextPrimary),
+        )
+        Row(modifier = Modifier.padding(top = 10.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Button(
+                onClick = onAccept,
+                shape = RoundedCornerShape(100),
+                colors = ButtonDefaults.buttonColors(containerColor = accent, contentColor = AppColors.Card),
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+            ) {
+                Text("${suggestion.label} にする", style = AppTypography.labelLarge.copy(fontSize = 12.5.sp, fontWeight = FontWeight.Bold))
+            }
+            OutlinedButton(
+                onClick = onDismiss,
+                shape = RoundedCornerShape(100),
+                border = BorderStroke(1.dp, AppColors.BorderDashed),
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = AppColors.TextSecondary),
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+            ) {
+                Text("このまま", style = AppTypography.labelLarge.copy(fontSize = 12.5.sp, fontWeight = FontWeight.Bold))
             }
         }
     }

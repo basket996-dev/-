@@ -1,7 +1,10 @@
 package com.zubora.taijuki.ui.theme
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
@@ -12,6 +15,10 @@ import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.scale
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextAlign
+import com.zubora.taijuki.data.Stamp
 
 /**
  * Hand-drawn stamp icons, ported from the prototype's inline SVG paths (24x24
@@ -23,9 +30,32 @@ import androidx.compose.ui.graphics.drawscope.scale
  */
 @Composable
 fun StampIcon(
-    type: StampType,
+    stamp: Stamp,
     modifier: Modifier = Modifier,
-    tint: Color = type.color,
+    tint: Color = stamp.color,
+) {
+    val builtin = stamp.builtin
+    if (builtin != null) {
+        BuiltinStampIcon(builtin, modifier, tint)
+    } else {
+        EmojiStampIcon(stamp.emoji ?: stamp.label.take(1), modifier)
+    }
+}
+
+/** A stamp the user made: its emoji, sized to the same box the drawn icons fill. Emoji keep their own colors. */
+@Composable
+private fun EmojiStampIcon(emoji: String, modifier: Modifier) {
+    BoxWithConstraints(modifier = modifier, contentAlignment = Alignment.Center) {
+        val size = with(LocalDensity.current) { (minOf(maxWidth, maxHeight) * 0.85f).toSp() }
+        Text(emoji, style = TextStyle(fontSize = size, lineHeight = size, textAlign = TextAlign.Center))
+    }
+}
+
+@Composable
+private fun BuiltinStampIcon(
+    type: StampType,
+    modifier: Modifier,
+    tint: Color,
 ) {
     Canvas(modifier = modifier) {
         val s = size.minDimension / 24f

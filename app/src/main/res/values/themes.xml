@@ -7,4 +7,5 @@
         <item name="android:navigationBarColor">@color/window_background</item>
         <item name="android:windowLightStatusBar">true</item>
     </style>
+
 </resources>

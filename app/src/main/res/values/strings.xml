@@ -3,6 +3,4 @@
     <string name="app_name">ズボラ体重記</string>
     <string name="reminder_channel_name">記録リマインド</string>
     <string name="reminder_channel_desc">今日の体重が未入力のときにお知らせします</string>
-    <string name="reminder_notification_title">ズボラ体重記</string>
-    <string name="reminder_notification_text">カレンダーの今日のマスが空いてますよ</string>
 </resources>

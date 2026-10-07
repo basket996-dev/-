@@ -1,7 +1,6 @@
 package com.zubora.taijuki.domain
 
 import com.zubora.taijuki.data.Entry
-import com.zubora.taijuki.ui.theme.StampType
 import java.time.LocalDate
 
 fun buildCsv(entries: Collection<Entry>): String {
@@ -24,17 +23,18 @@ private fun csvField(value: String): String =
         value
     }
 
+/** One CSV row. Stamps stay as names: the caller matches them to stamps, making any it doesn't know. */
+data class CsvRow(val date: LocalDate, val weight: Double, val stampLabels: List<String>, val memo: String)
+
 /** Inverse of [buildCsv]. Skips the header and any row that doesn't parse as a valid entry. */
-fun parseCsv(content: String): List<Entry> =
+fun parseCsv(content: String): List<CsvRow> =
     content.lines().drop(1).mapNotNull { line ->
         if (line.isBlank()) return@mapNotNull null
         val fields = splitCsvLine(line)
         if (fields.size < 4) return@mapNotNull null
         val date = runCatching { LocalDate.parse(fields[0]) }.getOrNull() ?: return@mapNotNull null
         val weight = fields[1].toDoubleOrNull() ?: return@mapNotNull null
-        val stamps = fields[2].split(" ").filter { it.isNotBlank() }
-            .mapNotNull { label -> StampType.entries.firstOrNull { it.label == label } }
-        Entry(date, weight, stamps, fields[3])
+        CsvRow(date, weight, fields[2].split(" ").filter { it.isNotBlank() }, fields[3])
     }
 
 private fun splitCsvLine(line: String): List<String> {

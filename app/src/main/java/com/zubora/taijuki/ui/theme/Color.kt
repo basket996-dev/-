@@ -51,8 +51,15 @@ enum class StampType(val id: String, val label: String, val color: Color) {
 
     companion object {
         fun fromId(id: String): StampType? = entries.firstOrNull { it.id == id }
-
-        /** The three stamps considered most relevant to weight correlation (graph "主要3種" mode). */
-        val KeyStamps = setOf(Undou, Osake, Tabesugi)
     }
 }
+
+/** Handed out in turn to stamps the user makes — kept apart from the originals' browns and oranges. */
+val CustomStampColors = listOf(
+    Color(0xFF4A8C8C), // teal
+    Color(0xFF7A5BA6), // purple
+    Color(0xFF5F7CB5), // blue
+    Color(0xFF8FA34A), // olive
+    Color(0xFFC0574A), // brick
+    Color(0xFFD08A3E), // amber
+)

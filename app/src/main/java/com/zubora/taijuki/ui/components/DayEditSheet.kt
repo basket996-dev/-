@@ -30,13 +30,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zubora.taijuki.AppViewModel
 import com.zubora.taijuki.DayModalState
+import com.zubora.taijuki.data.Stamp
 import com.zubora.taijuki.domain.formatDateJa
 import com.zubora.taijuki.ui.theme.AppColors
 import com.zubora.taijuki.ui.theme.AppTypography
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DayEditSheet(state: DayModalState, accent: Color, viewModel: AppViewModel) {
+fun DayEditSheet(state: DayModalState, stamps: List<Stamp>, accent: Color, viewModel: AppViewModel) {
     ModalBottomSheet(
         onDismissRequest = viewModel::closeDayModal,
         containerColor = AppColors.Surface,
@@ -80,6 +81,7 @@ fun DayEditSheet(state: DayModalState, accent: Color, viewModel: AppViewModel) {
             Spacer(Modifier.height(16.dp))
 
             StampPickerGrid(
+                stamps = pickerStamps(stamps, state.stamps),
                 selected = state.stamps,
                 onToggle = viewModel::toggleDayModalStamp,
                 iconSize = 17.dp,

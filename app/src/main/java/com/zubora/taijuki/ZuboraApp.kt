@@ -28,6 +28,7 @@ import com.zubora.taijuki.reminder.AlarmScheduler
 import com.zubora.taijuki.ui.components.BottomNavBar
 import com.zubora.taijuki.ui.components.DayEditSheet
 import com.zubora.taijuki.ui.components.NotificationBanner
+import com.zubora.taijuki.ui.components.StampManagerDialog
 import com.zubora.taijuki.ui.screens.CalendarScreen
 import com.zubora.taijuki.ui.screens.GraphScreen
 import com.zubora.taijuki.ui.screens.InputScreen
@@ -95,7 +96,11 @@ private fun AppShell(uiState: UiState, viewModel: AppViewModel) {
         }
     }
 
+    if (uiState.stampManagerOpen) {
+        StampManagerDialog(stamps = uiState.stamps, accent = uiState.accent, viewModel = viewModel)
+    }
+
     uiState.dayModal?.let { dayModal ->
-        DayEditSheet(state = dayModal, accent = uiState.accent, viewModel = viewModel)
+        DayEditSheet(state = dayModal, stamps = uiState.stamps, accent = uiState.accent, viewModel = viewModel)
     }
 }

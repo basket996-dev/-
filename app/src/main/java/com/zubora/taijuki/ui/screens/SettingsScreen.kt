@@ -67,6 +67,7 @@ import com.zubora.taijuki.ui.components.CheckGlyph
 import com.zubora.taijuki.ui.components.SegmentedControl
 import com.zubora.taijuki.ui.theme.AppColors
 import com.zubora.taijuki.ui.theme.AppTypography
+import com.zubora.taijuki.ui.theme.StampIcon
 import com.zubora.taijuki.ui.theme.accentDark
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -173,6 +174,35 @@ fun SettingsScreen(uiState: UiState, viewModel: AppViewModel) {
         }
 
         SettingsCard {
+            SectionTitle("スタンプ", bottomPadding = 10.dp)
+            val active = uiState.stamps.filter { it.active }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Row(
+                    modifier = Modifier.weight(1f),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    if (active.isEmpty()) {
+                        Text("入力画面に出していません", style = AppTypography.bodySmall.copy(fontSize = 12.sp, color = AppColors.TextPlaceholder))
+                    }
+                    active.forEach { StampIcon(it, modifier = Modifier.size(20.dp)) }
+                }
+                OutlinedButton(
+                    onClick = viewModel::openStampManager,
+                    shape = RoundedCornerShape(100),
+                    border = BorderStroke(1.dp, AppColors.BorderDashed),
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = accentDark(accent)),
+                ) {
+                    Text("編集する", style = AppTypography.labelLarge.copy(fontSize = 12.5.sp, fontWeight = FontWeight.Bold))
+                }
+            }
+        }
+
+        SettingsCard {
             SectionTitle("通知", bottomPadding = 14.dp)
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -197,7 +227,7 @@ fun SettingsScreen(uiState: UiState, viewModel: AppViewModel) {
                 border = BorderStroke(1.dp, AppColors.BorderDashed),
                 colors = ButtonDefaults.outlinedButtonColors(contentColor = accentDark(accent)),
             ) {
-                Text("通知プレビューを見る", style = AppTypography.labelLarge.copy(fontSize = 12.5.sp, fontWeight = FontWeight.Bold))
+                Text("通知を送ってみる（そこから記録もできます）", style = AppTypography.labelLarge.copy(fontSize = 12.5.sp, fontWeight = FontWeight.Bold))
             }
         }
 

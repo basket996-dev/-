@@ -2,8 +2,8 @@ package com.zubora.taijuki.domain
 
 import com.zubora.taijuki.data.Entry
 import com.zubora.taijuki.data.GraphPeriod
+import com.zubora.taijuki.data.Stamp
 import com.zubora.taijuki.data.StampMode
-import com.zubora.taijuki.ui.theme.StampType
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 import kotlin.math.ceil
@@ -17,9 +17,9 @@ data class GraphPoint(
     val xFrac: Float,
     /** Mean of every entry in the 7 days ending on [date] — smooths out the day-to-day wobble. */
     val average: Double,
-    /** The stamp drawn above the dot, after the 主要3種/すべて/非表示 setting is applied. */
-    val marker: StampType?,
-    val stamps: List<StampType>,
+    /** The stamp drawn above the dot, unless stamps are hidden in settings. */
+    val marker: Stamp?,
+    val stamps: List<Stamp>,
 )
 
 data class GraphYTick(val value: Double, val label: String)
@@ -32,8 +32,8 @@ data class GraphData(
     val yMax: Double,
     val yTicks: List<GraphYTick>,
     val xTicks: List<GraphXTick>,
-    /** Stamps that have a marker somewhere in view, in StampType order — the chart's legend. */
-    val legendStamps: List<StampType>,
+    /** Stamps that have a marker somewhere in view, in the user's order — the chart's legend. */
+    val legendStamps: List<Stamp>,
 )
 
 val EMPTY_GRAPH = GraphData(emptyList(), 0.0, 1.0, emptyList(), emptyList(), emptyList())
@@ -77,7 +77,7 @@ fun buildGraphData(
             weight = e.weight,
             xFrac = xFrac(date),
             average = trailingAverage(entries, date),
-            marker = e.stamps.firstOrNull { stampMode.shows(it) },
+            marker = if (stampMode == StampMode.None) null else e.stamps.firstOrNull(),
             stamps = e.stamps,
         )
     }
@@ -90,14 +90,8 @@ fun buildGraphData(
         yMax = yMax,
         yTicks = yTicks,
         xTicks = dateTicks(start, end).map { GraphXTick(xFrac(it.first), it.second) },
-        legendStamps = StampType.entries.filter { s -> points.any { it.marker == s } },
+        legendStamps = points.mapNotNull { it.marker }.distinct().sortedBy { it.sortOrder },
     )
-}
-
-private fun StampMode.shows(stamp: StampType): Boolean = when (this) {
-    StampMode.None -> false
-    StampMode.Key -> stamp in StampType.KeyStamps
-    StampMode.All -> true
 }
 
 /** Reads from all entries, not just the visible window, so the line doesn't restart at the left edge. */

@@ -1,7 +1,7 @@
 package com.zubora.taijuki.domain
 
 import com.zubora.taijuki.data.Entry
-import com.zubora.taijuki.ui.theme.StampType
+import com.zubora.taijuki.data.Stamp
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -12,7 +12,7 @@ data class CalendarCell(
     val isToday: Boolean,
     val hasEntry: Boolean,
     val weightDisplay: String,
-    val stamps: List<StampType>,
+    val stamps: List<Stamp>,
     val hasMemo: Boolean,
 )
 

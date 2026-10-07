@@ -2,8 +2,8 @@ package com.zubora.taijuki.domain
 
 import com.zubora.taijuki.data.Entry
 import com.zubora.taijuki.data.GraphPeriod
+import com.zubora.taijuki.data.Stamp
 import com.zubora.taijuki.data.StampMode
-import com.zubora.taijuki.ui.theme.StampType
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -12,7 +12,7 @@ import java.time.LocalDate
 class GraphMathTest {
     private val today = LocalDate.of(2026, 10, 5)
 
-    private fun entries(vararg days: Pair<LocalDate, Double>, stamps: Map<LocalDate, List<StampType>> = emptyMap()) =
+    private fun entries(vararg days: Pair<LocalDate, Double>, stamps: Map<LocalDate, List<Stamp>> = emptyMap()) =
         days.associate { (d, w) -> d to Entry(d, w, stamps[d] ?: emptyList(), "") }
 
     @Test
@@ -102,14 +102,28 @@ class GraphMathTest {
     }
 
     @Test
-    fun keyModeFindsAKeyStampEvenWhenItIsNotFirst() {
-        val day = today
-        val all = entries(day to 80.0, stamps = mapOf(day to listOf(StampType.Benzuu, StampType.Tabesugi)))
-        assertEquals(StampType.Tabesugi, buildGraphData(all, GraphPeriod.All, StampMode.Key, today).points.single().marker)
-        assertEquals(StampType.Benzuu, buildGraphData(all, GraphPeriod.All, StampMode.All, today).points.single().marker)
+    fun markerIsTheDaysFirstStampAndTheLegendFollowsTheUsersOrder() {
+        val yesterday = today.minusDays(1)
+        val all = entries(
+            yesterday to 80.0,
+            today to 79.5,
+            stamps = mapOf(yesterday to listOf(TestStamps.gaishoku), today to listOf(TestStamps.benzuu, TestStamps.tabesugi)),
+        )
+        val data = buildGraphData(all, GraphPeriod.All, StampMode.All, today)
+        assertEquals(listOf(TestStamps.gaishoku, TestStamps.benzuu), data.points.map { it.marker })
+        // benzuu comes before gaishoku in the user's order, whichever day shows up first.
+        assertEquals(listOf(TestStamps.benzuu, TestStamps.gaishoku), data.legendStamps)
+
         val hidden = buildGraphData(all, GraphPeriod.All, StampMode.None, today)
-        assertEquals(null, hidden.points.single().marker)
+        assertTrue(hidden.points.all { it.marker == null })
         assertTrue(hidden.legendStamps.isEmpty())
+    }
+
+    @Test
+    fun theOldKeyStampSettingNowShowsEveryStamp() {
+        // "key" (主要3種) was saved by the version with six fixed stamps.
+        assertEquals(StampMode.All, StampMode.fromId("key"))
+        assertEquals(StampMode.None, StampMode.fromId("none"))
     }
 
     @Test

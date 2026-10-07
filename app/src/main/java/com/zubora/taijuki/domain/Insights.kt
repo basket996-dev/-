@@ -2,7 +2,7 @@ package com.zubora.taijuki.domain
 
 import androidx.compose.ui.graphics.Color
 import com.zubora.taijuki.data.Entry
-import com.zubora.taijuki.ui.theme.StampType
+import com.zubora.taijuki.data.Stamp
 import java.time.LocalDate
 
 data class MemoryItem(
@@ -55,20 +55,17 @@ fun buildMemoFeed(entries: Map<LocalDate, Entry>, today: LocalDate): List<MemoFe
         .map { (date, e) -> MemoFeedItem(date, formatDateJa(date), e.weight.toFixed1(), e.memo) }
 }
 
-data class WeeklyStampCount(val stamp: StampType, val count: Int)
+data class WeeklyStampCount(val stamp: Stamp, val count: Int)
 
 fun buildWeeklyStampCounts(entries: Map<LocalDate, Entry>, today: LocalDate): List<WeeklyStampCount> {
     val cutoff = today.minusDays(6)
-    val counts = mutableMapOf<StampType, Int>()
+    val counts = mutableMapOf<Stamp, Int>()
     entries.forEach { (date, e) ->
         if (date in cutoff..today) {
             e.stamps.forEach { s -> counts[s] = (counts[s] ?: 0) + 1 }
         }
     }
-    return StampType.entries.mapNotNull { s ->
-        val c = counts[s] ?: 0
-        if (c > 0) WeeklyStampCount(s, c) else null
-    }
+    return counts.entries.sortedBy { it.key.sortOrder }.map { (s, c) -> WeeklyStampCount(s, c) }
 }
 
 fun currentWeight(entries: Map<LocalDate, Entry>, fallback: Double): Double =

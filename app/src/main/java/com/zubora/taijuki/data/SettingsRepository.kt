@@ -27,11 +27,11 @@ enum class GraphPeriod(val id: String, val label: String, val days: Int?) {
 
 enum class StampMode(val id: String, val label: String) {
     None("none", "非表示"),
-    Key("key", "主要3種"),
     All("all", "すべて");
 
     companion object {
-        fun fromId(id: String?): StampMode = entries.firstOrNull { it.id == id } ?: Key
+        // The old "key" (主要3種) mode was tied to the fixed six stamps; it now shows everything.
+        fun fromId(id: String?): StampMode = entries.firstOrNull { it.id == id } ?: All
     }
 }
 
@@ -44,8 +44,10 @@ data class AppSettings(
     val reminderEnabled: Boolean = true,
     val reminderTime: String = "21:00",
     val graphPeriod: GraphPeriod = GraphPeriod.Month,
-    val graphStampMode: StampMode = StampMode.Key,
+    val graphStampMode: StampMode = StampMode.All,
     val hasAvatar: Boolean = false,
+    /** A reminder-time suggestion ("HH:mm") the user said no to, so it isn't offered again. */
+    val dismissedReminderSuggestion: String? = null,
 )
 
 class SettingsRepository(private val context: Context) {
@@ -60,6 +62,7 @@ class SettingsRepository(private val context: Context) {
         val GRAPH_PERIOD = stringPreferencesKey("graph_period")
         val GRAPH_STAMP_MODE = stringPreferencesKey("graph_stamp_mode")
         val HAS_AVATAR = booleanPreferencesKey("has_avatar")
+        val DISMISSED_REMINDER_SUGGESTION = stringPreferencesKey("dismissed_reminder_suggestion")
     }
 
     val settings: Flow<AppSettings> = context.dataStore.data.map { p ->
@@ -74,6 +77,7 @@ class SettingsRepository(private val context: Context) {
             graphPeriod = GraphPeriod.fromId(p[Keys.GRAPH_PERIOD]),
             graphStampMode = StampMode.fromId(p[Keys.GRAPH_STAMP_MODE]),
             hasAvatar = p[Keys.HAS_AVATAR] ?: false,
+            dismissedReminderSuggestion = p[Keys.DISMISSED_REMINDER_SUGGESTION],
         )
     }
 
@@ -114,5 +118,9 @@ class SettingsRepository(private val context: Context) {
 
     suspend fun setHasAvatar(has: Boolean) {
         context.dataStore.edit { p -> p[Keys.HAS_AVATAR] = has }
+    }
+
+    suspend fun setDismissedReminderSuggestion(time: String) {
+        context.dataStore.edit { p -> p[Keys.DISMISSED_REMINDER_SUGGESTION] = time }
     }
 }
